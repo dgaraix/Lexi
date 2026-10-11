@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Lexi — Reading, Spelling, Numbers & Sounds</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,13 +64,13 @@
   @keyframes badf{0%,100%{box-shadow:0 18px 40px rgba(90,80,140,.18);}40%{box-shadow:0 0 0 8px rgba(255,107,107,.5),0 18px 40px rgba(90,80,140,.18);}}
   .display{width:100%;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:12px;text-align:center;}
-  .hint{font-family:'Fredoka',sans-serif;font-weight:500;color:#B4AECB;font-size:clamp(18px,4.5vw,24px);line-height:1.35;padding:0 10px;}
+  .hint{font-family:'Fredoka',sans-serif;font-weight:500;color:#6A6482;font-size:clamp(18px,4.5vw,24px);line-height:1.35;padding:0 10px;}
   .hint .big{display:block;font-size:44px;margin-bottom:6px;}
   .numeral{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(110px,32vw,180px);line-height:.9;margin:0;}
   .bigtext{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(52px,15vw,110px);line-height:.95;margin:0;
     letter-spacing:1px;overflow-wrap:anywhere;}
   .card-icon{font-size:clamp(48px,13vw,84px);line-height:1;}
-  .sub{font-family:'Fredoka',sans-serif;font-weight:600;font-size:clamp(28px,7vw,42px);color:#B7B0CE;margin-top:-4px;}
+  .sub{font-family:'Fredoka',sans-serif;font-weight:600;font-size:clamp(28px,7vw,42px);color:#6A6482;margin-top:-4px;}
   .example{font-family:'Fredoka',sans-serif;font-weight:500;color:#8A83A6;font-size:clamp(16px,4.2vw,21px);
     display:flex;align-items:center;gap:8px;justify-content:center;}
   .example b{color:var(--grape);font-weight:600;}
@@ -145,16 +145,16 @@
   <nav class="sheet" id="menuSheet" aria-label="Settings">
     <button class="sheet-close" id="menuClose" aria-label="Close menu">✕</button>
     <h1><span class="pop">Lexi</span></h1>
-    <p class="tagline">Numbers, letters & sounds — say it out loud 🗣️</p>
+    <p class="tagline" id="tagline">Numbers, letters & sounds — say it out loud 🗣️</p>
 
-    <div class="sec">Language</div>
+    <div class="sec" id="secLang">Language</div>
     <div class="seg-wrap" id="langSeg">
       <button class="seg-btn active" data-lang="en">🇺🇸 English</button>
       <button class="seg-btn" data-lang="fr">🇫🇷 Français</button>
       <button class="seg-btn" data-lang="es">🇪🇸 Español</button>
     </div>
 
-    <div class="sec">Game</div>
+    <div class="sec" id="secGame">Game</div>
     <div class="seg-wrap" id="modeSeg">
       <button class="seg-btn active" id="tabNum" data-mode="num">🔢 Numbers</button>
       <button class="seg-btn" id="tabLet" data-mode="let">🔠 Words</button>
@@ -162,18 +162,18 @@
     </div>
 
     <div id="numControls">
-      <div class="sec">Number range</div>
+      <div class="sec" id="secRange">Number range</div>
       <div class="range-line">
-        <label for="min">From</label>
+        <label for="min" id="lblFrom">From</label>
         <input id="min" class="num-input" type="number" inputmode="numeric" value="1" min="1" max="100" />
         <span>–</span>
-        <label for="max">To</label>
+        <label for="max" id="lblTo">To</label>
         <input id="max" class="num-input" type="number" inputmode="numeric" value="30" min="1" max="100" />
       </div>
     </div>
 
     <div id="letterControls" class="hidden">
-      <div class="sec">Length</div>
+      <div class="sec" id="secLen">Length</div>
       <div class="seg-wrap" id="lenSeg">
         <button class="seg-btn len" data-len="1">1</button>
         <button class="seg-btn len active" data-len="2">2</button>
@@ -187,13 +187,13 @@
         <button class="seg-btn active" data-lm="eq">🎯 Exactly</button>
         <button class="seg-btn" data-lm="ge">➕ Or more</button>
       </div>
-      <div class="sec">Pictures</div>
+      <div class="sec" id="secPic">Pictures</div>
       <div class="seg-wrap" id="picSeg">
         <button class="seg-btn active" data-pic="show">🖼️ Show</button>
         <button class="seg-btn" data-pic="reveal">🎁 Tap to reveal</button>
         <button class="seg-btn" data-pic="hide">🙈 Hide</button>
       </div>
-      <div class="sec">Topics</div>
+      <div class="sec" id="secTopic">Topics</div>
       <div class="seg-wrap" id="topicSeg"></div>
       <div class="filter-hint hidden" id="filterHint"></div>
     </div>
@@ -202,13 +202,13 @@
       <div class="filter-hint" id="soundInfo"></div>
     </div>
 
-    <div class="sec">Mode</div>
+    <div class="sec" id="secMode">Mode</div>
     <div class="seg-wrap" id="playModeSeg">
       <button class="seg-btn active" data-pm="train">🏋️ Practice</button>
       <button class="seg-btn" data-pm="test">🎓 Test</button>
     </div>
     <div id="testControls" class="hidden">
-      <div class="sec">Test questions</div>
+      <div class="sec" id="secTestQ">Test questions</div>
       <div class="seg-wrap" id="testLenSeg">
         <button class="seg-btn active" data-tn="10">10</button>
         <button class="seg-btn" data-tn="20">20</button>
@@ -242,7 +242,8 @@ let audioCtx=null;
 function ac(){ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==='suspended')audioCtx.resume(); return audioCtx; }
 function tone(freqs,type,vol,dur,gap){
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  /* R11.3: audio feedback is NOT visual motion — it plays regardless of the reduce-motion
+     setting. Only the visual effects (confetti, fireworks, CSS animations) are suppressed. */
   try{ const a=ac(),t=a.currentTime;
     freqs.forEach((f,i)=>{ const o=a.createOscillator(),g=a.createGain();
       o.type=type;o.frequency.value=f;const s=t+i*gap;
@@ -450,6 +451,121 @@ es:{ name:'Español', lang:'es-ES',
 
 const FLAGS={en:'🇺🇸',fr:'🇫🇷',es:'🇪🇸'};
 
+/* ================= UI strings in three languages (R11.4) =================
+   Chrome copy, verified FR/ES. Tokens: {n} {lang} {topic} {old} {new} {x} {e} */
+const UI={
+ en:{ tagline:'Numbers, letters & sounds — say it out loud 🗣️',
+  secLang:'Language', secGame:'Game', secRange:'Number range', secLen:'Length',
+  secPic:'Pictures', secTopic:'Topics', secMode:'Mode', secTestQ:'Test questions',
+  from:'From', to:'To',
+  mNum:'🔢 Numbers', mWords:'🔠 Words', mSounds:'🗣️ Sounds',
+  lmEq:'🎯 Exactly', lmGe:'➕ Or more',
+  picShow:'🖼️ Show', picReveal:'🎁 Tap to reveal', picHide:'🙈 Hide',
+  pmTrain:'🏋️ Practice', pmTest:'🎓 Test',
+  bBack:'⬅️ Back', bHear:'🔊 Hear it', bGot:'✓ Got it!', bNot:'✗ Not yet',
+  allTopics:'✨ All',
+  ready:'Ready when you are!<br>Tap the big button below.',
+  give:'🎲 Give me one!', next:'➡️ Next one!',
+  startTest:'🎓 Start the test! ({n})',
+  qCount:'{n} questions.', howSpeak:'Say each answer out loud into the mic!',
+  howGrown:'A grown-up checks each answer.',
+  sayIt:'🎤 Say it!', listening:'👂 Listening…',
+  heard:'👂 I heard: “{x}”',
+  noHeard:'👂 I didn’t hear anything — tap the button and try again!',
+  micBad:'🎤 The microphone isn’t available here ({e}). That usually happens when the page is opened as a saved file — mic checking needs the page served from a website. No problem: the grown-up taps ✓ or ✗ instead.',
+  fbForce:'Speech checking is unreliable for this content — grown-up taps ✓ or ✗ after the answer.',
+  fbBroken:'🎤 Mic unavailable — grown-up taps ✓ or ✗.',
+  fbNoAPI:'🎤 Speech recognition is not available in this browser — grown-up taps ✓ or ✗.',
+  resPerfect:'PERFECT! Incredible!', resPass:'You passed — amazing!',
+  resTry:'Good try — practice makes progress!', toPractice:'To practice:', tryAgain:'🔁 Try again!',
+  warnSwitch:'⚠️ {topic} has no {old}-letter words in {lang} — switched to {new} letters.',
+  hintAlpha:'ℹ️ Single letters use the whole alphabet — topics don’t apply.',
+  hintFaded:'ℹ️ Faded choices have no {lang} words matching your picks — tapping one adjusts the other filters.',
+  soundInfo:'🗣️ All {n} {lang} sounds & syllables, shuffled. Each card shows an example word.',
+  testMic:'🎤 The child says each answer out loud — the mic checks it. Needs internet + mic permission.',
+  testGrown:'ℹ️ For this content the grown-up validates answers with ✓ / ✗.' },
+ fr:{ tagline:'Chiffres, lettres et sons — dis-le à voix haute 🗣️',
+  secLang:'Langue', secGame:'Jeu', secRange:'Plage de nombres', secLen:'Longueur',
+  secPic:'Images', secTopic:'Thèmes', secMode:'Mode', secTestQ:'Questions du test',
+  from:'De', to:'À',
+  mNum:'🔢 Nombres', mWords:'🔠 Mots', mSounds:'🗣️ Sons',
+  lmEq:'🎯 Exactement', lmGe:'➕ Ou plus',
+  picShow:'🖼️ Montrer', picReveal:'🎁 Toucher pour voir', picHide:'🙈 Cacher',
+  pmTrain:'🏋️ Entraînement', pmTest:'🎓 Test',
+  bBack:'⬅️ Retour', bHear:'🔊 Écouter', bGot:'✓ Réussi !', bNot:'✗ Pas encore',
+  allTopics:'✨ Tout',
+  ready:'Prêt quand tu veux !<br>Appuie sur le grand bouton.',
+  give:'🎲 Donne-m’en un !', next:'➡️ Encore un !',
+  startTest:'🎓 Commencer le test ! ({n})',
+  qCount:'{n} questions.', howSpeak:'Dis chaque réponse à voix haute dans le micro !',
+  howGrown:'Un adulte vérifie chaque réponse.',
+  sayIt:'🎤 Dis-le !', listening:'👂 J’écoute…',
+  heard:'👂 J’ai entendu : « {x} »',
+  noHeard:'👂 Je n’ai rien entendu — appuie sur le bouton et réessaie !',
+  micBad:'🎤 Le micro n’est pas disponible ici ({e}). Cela arrive souvent quand la page est ouverte comme un fichier enregistré — la vérification par le micro a besoin que la page vienne d’un site web. Pas de souci : l’adulte appuie sur ✓ ou ✗.',
+  fbForce:'La vérification vocale n’est pas fiable pour ce contenu — l’adulte appuie sur ✓ ou ✗ après la réponse.',
+  fbBroken:'🎤 Micro indisponible — l’adulte appuie sur ✓ ou ✗.',
+  fbNoAPI:'🎤 La reconnaissance vocale n’est pas disponible dans ce navigateur — l’adulte appuie sur ✓ ou ✗.',
+  resPerfect:'PARFAIT ! Incroyable !', resPass:'Réussi — bravo !',
+  resTry:'Bien essayé — c’est en s’entraînant qu’on progresse !', toPractice:'À réviser :', tryAgain:'🔁 Réessayer !',
+  warnSwitch:'⚠️ {topic} n’a pas de mots de {old} lettres en {lang} — passé à {new} lettres.',
+  hintAlpha:'ℹ️ Les lettres seules utilisent tout l’alphabet — les thèmes ne s’appliquent pas.',
+  hintFaded:'ℹ️ Les choix estompés n’ont pas de mots en {lang} correspondant à ta sélection — en toucher un ajuste les autres filtres.',
+  soundInfo:'🗣️ Les {n} sons et syllabes en {lang}, mélangés. Chaque carte montre un mot exemple.',
+  testMic:'🎤 L’enfant dit chaque réponse à voix haute — le micro vérifie. Besoin d’Internet et du micro.',
+  testGrown:'ℹ️ Pour ce contenu, l’adulte valide les réponses avec ✓ / ✗.' },
+ es:{ tagline:'Números, letras y sonidos — dilo en voz alta 🗣️',
+  secLang:'Idioma', secGame:'Juego', secRange:'Rango de números', secLen:'Longitud',
+  secPic:'Imágenes', secTopic:'Temas', secMode:'Modo', secTestQ:'Preguntas del test',
+  from:'De', to:'A',
+  mNum:'🔢 Números', mWords:'🔠 Palabras', mSounds:'🗣️ Sonidos',
+  lmEq:'🎯 Exactamente', lmGe:'➕ O más',
+  picShow:'🖼️ Mostrar', picReveal:'🎁 Tocar para ver', picHide:'🙈 Ocultar',
+  pmTrain:'🏋️ Práctica', pmTest:'🎓 Test',
+  bBack:'⬅️ Atrás', bHear:'🔊 Escuchar', bGot:'✓ ¡Lo logré!', bNot:'✗ Todavía no',
+  allTopics:'✨ Todo',
+  ready:'¡Cuando quieras!<br>Toca el botón grande.',
+  give:'🎲 ¡Dame uno!', next:'➡️ ¡Otro más!',
+  startTest:'🎓 ¡Empezar el test! ({n})',
+  qCount:'{n} preguntas.', howSpeak:'¡Di cada respuesta en voz alta al micrófono!',
+  howGrown:'Un adulto revisa cada respuesta.',
+  sayIt:'🎤 ¡Dilo!', listening:'👂 Escuchando…',
+  heard:'👂 Escuché: « {x} »',
+  noHeard:'👂 No escuché nada — ¡toca el botón e inténtalo de nuevo!',
+  micBad:'🎤 El micrófono no está disponible aquí ({e}). Suele pasar cuando la página se abre como un archivo guardado — la comprobación por micrófono necesita que la página venga de un sitio web. Sin problema: el adulto toca ✓ o ✗.',
+  fbForce:'La comprobación por voz no es fiable para este contenido — el adulto toca ✓ o ✗ después de la respuesta.',
+  fbBroken:'🎤 Micrófono no disponible — el adulto toca ✓ o ✗.',
+  fbNoAPI:'🎤 El reconocimiento de voz no está disponible en este navegador — el adulto toca ✓ o ✗.',
+  resPerfect:'¡PERFECTO! ¡Increíble!', resPass:'¡Aprobado — genial!',
+  resTry:'¡Buen intento — practicando se progresa!', toPractice:'Para practicar:', tryAgain:'🔁 ¡Intentar de nuevo!',
+  warnSwitch:'⚠️ {topic} no tiene palabras de {old} letras en {lang} — cambié a {new} letras.',
+  hintAlpha:'ℹ️ Las letras solas usan todo el alfabeto — los temas no aplican.',
+  hintFaded:'ℹ️ Las opciones atenuadas no tienen palabras en {lang} que coincidan con tu selección — tocar una ajusta los otros filtros.',
+  soundInfo:'🗣️ Los {n} sonidos y sílabas en {lang}, mezclados. Cada tarjeta muestra una palabra de ejemplo.',
+  testMic:'🎤 El niño dice cada respuesta en voz alta — el micrófono la revisa. Necesita Internet y micrófono.',
+  testGrown:'ℹ️ Para este contenido, el adulto valida las respuestas con ✓ / ✗.' }
+};
+/* L('key',{tokens}) → localized string for the current language, tokens substituted */
+function L(key,tok){ let s=(UI[curLang]&&UI[curLang][key])||UI.en[key]||'';
+  if(tok)for(const k in tok)s=s.split('{'+k+'}').join(tok[k]); return s; }
+/* Translate all static menu chrome into the current language */
+function applyStaticStrings(){
+  const set=(id,txt)=>{const el=$(id);if(el)el.textContent=txt;};
+  set('tagline',L('tagline'));
+  set('secLang',L('secLang'));set('secGame',L('secGame'));set('secRange',L('secRange'));
+  set('secLen',L('secLen'));set('secPic',L('secPic'));set('secTopic',L('secTopic'));
+  set('secMode',L('secMode'));set('secTestQ',L('secTestQ'));
+  set('lblFrom',L('from'));set('lblTo',L('to'));
+  set('tabNum',L('mNum'));set('tabLet',L('mWords'));set('tabSnd',L('mSounds'));
+  const q=(sel,txt)=>{const el=document.querySelector(sel);if(el)el.textContent=txt;};
+  q('#lenModeSeg [data-lm="eq"]',L('lmEq'));q('#lenModeSeg [data-lm="ge"]',L('lmGe'));
+  q('#picSeg [data-pic="show"]',L('picShow'));q('#picSeg [data-pic="reveal"]',L('picReveal'));
+  q('#picSeg [data-pic="hide"]',L('picHide'));
+  q('#playModeSeg [data-pm="train"]',L('pmTrain'));q('#playModeSeg [data-pm="test"]',L('pmTest'));
+  set('hearBtn',L('bHear'));set('prevBtn',L('bBack'));
+  set('markRight',L('bGot'));set('markWrong',L('bNot'));
+}
+
 /* ================= state ================= */
 let mode='num', curLang='en', curLen=2, lenMode='eq', picMode='show';
 let selCats=new Set();
@@ -641,7 +757,7 @@ function trainPrev(){
 function afterTrainRender(){
   hearBtn.disabled=false;
   prevBtn.disabled=histIdx<=0;
-  revealText.textContent='Next one!';revealIcon.textContent='➡️';
+  revealIcon.textContent='';revealText.textContent=L('next');
   freeStars++;setChip('⭐ <span id="chipText">'+freeStars+'</span>');
 }
 
@@ -660,39 +776,33 @@ function nextQuestion(){
   const fb=forceFallback()||!srAvailable();
   fallbackBtns.classList.toggle('hidden',!fb);
   $('srNote').classList.add('hidden');
-  if(fb) showNote(forceFallback()
-    ?'Speech checking is unreliable for this content — grown-up taps ✓ or ✗ after the answer.'
-    :srBroken
-      ?'🎤 Mic unavailable — grown-up taps ✓ or ✗.'
-      :'🎤 Speech recognition is not available in this browser — grown-up taps ✓ or ✗.');
+  if(fb) showNote(forceFallback()?L('fbForce'):srBroken?L('fbBroken'):L('fbNoAPI'));
   revealBtn.classList.toggle('hidden',fb);
-  if(!fb){ revealBtn.className='reveal listen'; revealText.textContent='Say it!'; revealIcon.textContent='🎤'; }
+  if(!fb){ revealBtn.className='reveal listen'; revealIcon.textContent='';revealText.textContent=L('sayIt'); }
   updateTestChip(); updateDots();
 }
 function micTap(){
   if(test.state!=='question')return;
   test.state='listening';
-  revealBtn.className='reveal listening'; revealText.textContent='Listening…'; revealIcon.textContent='👂';
+  revealBtn.className='reveal listening'; revealIcon.textContent='';revealText.textContent=L('listening');
   listenOnce(res=>{
     if(res.alts&&res.alts.length){
       const ok=answerMatches(res.alts,curItem,curLang,mode);
-      if(!ok)showNote('👂 I heard: “'+res.alts[0]+'”');
+      if(!ok)showNote(L('heard',{x:res.alts[0]}));
       settleAnswer(ok);                                   // only a real answer is ever scored (R6.9)
       return;
     }
     /* not an answer — never counts against the child */
     test.state='question';
-    revealBtn.className='reveal listen'; revealText.textContent='Say it!'; revealIcon.textContent='🎤';
+    revealBtn.className='reveal listen'; revealIcon.textContent='';revealText.textContent=L('sayIt');
     if(res.error==='no-speech'||res.error==='aborted'){
-      showNote('👂 I didn’t hear anything — tap the button and try again!');
+      showNote(L('noHeard'));
       return;
     }
     /* hard failure: mic permission denied, no service (common for file:// pages), etc. */
     srBroken=true;
     fallbackBtns.classList.remove('hidden'); revealBtn.classList.add('hidden');
-    showNote('🎤 The microphone isn’t available here ('+res.error+'). That usually happens when the page '
-      +'is opened as a saved file — mic checking needs the page served from a website. '
-      +'No problem: the grown-up taps ✓ or ✗ instead.');
+    showNote(L('micBad',{e:res.error}));
   });
 }
 function showNote(t){ const n=$('srNote'); n.textContent=t; n.classList.remove('hidden'); }
@@ -725,14 +835,14 @@ function endTest(){
   fallbackBtns.classList.add('hidden');$('srNote').classList.add('hidden');
   const p=document.createElement('div');p.className='panel animate-pop';
   const emoji=perfect?'🏆':pass?'🎆':'🌱';
-  const line=perfect?'PERFECT! Incredible!':pass?'You passed — amazing!':'Good try — practice makes progress!';
+  const line=perfect?L('resPerfect'):pass?L('resPass'):L('resTry');
   p.innerHTML='<div class="big-emoji">'+emoji+'</div><h2>'+test.correct+' / '+testN+' — '+pct+'%</h2>'+
     '<div class="scoreline">'+line+'</div>'+
-    (test.missed.length?'<div class="practice">To practice: <b>'+test.missed.join('</b> · <b>')+'</b></div>':'');
+    (test.missed.length?'<div class="practice">'+L('toPractice')+' <b>'+test.missed.join('</b> · <b>')+'</b></div>':'');
   display.appendChild(p);
   if(perfect)fireworks(2); else if(pass)fireworks(1);
   revealBtn.classList.remove('hidden');revealBtn.className='reveal';
-  revealText.textContent='Try again!';revealIcon.textContent='🔁';
+  revealIcon.textContent='';revealText.textContent=L('tryAgain');
   test.state='idle-after';
 }
 function updateTestChip(){ setChip('🎓 <span id="chipText">'+Math.min(test.i,testN)+'/'+testN+'</span>'); }
@@ -762,14 +872,14 @@ function setIdleUI(){
   $('flagEl').textContent=FLAGS[curLang];
   if(playMode==='train'){
     trainBtns.classList.remove('hidden');
-    revealText.textContent='Give me one!';revealIcon.textContent='🎲';
-    display.innerHTML='<div class="hint"><span class="big">👋🐣</span>Ready when you are!<br>Tap the big button below.</div>';
+    revealIcon.textContent='';revealText.textContent=L('give');
+    display.innerHTML='<div class="hint"><span class="big">👋🐣</span>'+L('ready')+'</div>';
     setChip('⭐ <span id="chipText">'+freeStars+'</span>');
   } else {
     trainBtns.classList.add('hidden');
-    revealText.textContent='Start the test! ('+testN+')';revealIcon.textContent='🎓';
-    const how=(forceFallback()||!srAvailable())?'A grown-up checks each answer.':'Say each answer out loud into the mic!';
-    display.innerHTML='<div class="hint"><span class="big">🎓🎤</span>'+testN+' questions.<br>'+how+'</div>';
+    revealIcon.textContent='';revealText.textContent=L('startTest',{n:testN});
+    const how=(forceFallback()||!srAvailable())?L('howGrown'):L('howSpeak');
+    display.innerHTML='<div class="hint"><span class="big">🎓🎤</span>'+L('qCount',{n:testN})+'<br>'+how+'</div>';
     setChip('🎓 <span id="chipText">0/'+testN+'</span>');
   }
 }
@@ -816,8 +926,7 @@ function refreshFilters(){
       curLen=opts[0];
       document.querySelectorAll('#lenSeg [data-len]').forEach(x=>
         x.classList.toggle('active',parseInt(x.dataset.len,10)===curLen));
-      hint='⚠️ '+topicSummary()+' has no '+lenLabel(oldLen)+'-letter words in '+DATA[curLang].name+
-        ' — switched to '+lenLabel(curLen)+' letters.';
+      hint=L('warnSwitch',{topic:topicSummary(),old:lenLabel(oldLen),lang:DATA[curLang].name,new:lenLabel(curLen)});
       warn=true;
     }
   }
@@ -828,8 +937,8 @@ function refreshFilters(){
     if(!on)anyOff=true;
   });
   if(!hint){
-    if(curLen===1&&lenMode==='eq')hint='ℹ️ Single letters use the whole alphabet — topics don’t apply.';
-    else if(anyOff)hint='ℹ️ Faded choices have no '+DATA[curLang].name+' words matching your picks — tapping one adjusts the other filters.';
+    if(curLen===1&&lenMode==='eq')hint=L('hintAlpha');
+    else if(anyOff)hint=L('hintFaded',{lang:DATA[curLang].name});
   }
   const fh=$('filterHint');
   fh.textContent=hint;fh.classList.toggle('hidden',!hint);fh.classList.toggle('warn',warn);
@@ -838,7 +947,7 @@ function renderTopics(){
   const seg=$('topicSeg');seg.innerHTML='';
   const all=document.createElement('button');
   all.className='seg-btn topic'+(selCats.size===0?' active':'');
-  all.dataset.cat='all';all.textContent='✨ '+({en:'All',fr:'Tout',es:'Todo'})[curLang];
+  all.dataset.cat='all';all.textContent=L('allTopics');
   seg.appendChild(all);
   for(const c of CATS){
     const b=document.createElement('button');
@@ -853,11 +962,9 @@ function updateModePanels(){
   $('soundControls').classList.toggle('hidden',mode!=='snd');
   if(mode==='snd'){
     const n=Object.values(DATA[curLang].sounds||{}).reduce((s,a)=>s+a.length,0);
-    $('soundInfo').textContent='🗣️ All '+n+' '+DATA[curLang].name+' sounds & syllables, shuffled. Each card shows an example word.';
+    $('soundInfo').textContent=L('soundInfo',{n:n,lang:DATA[curLang].name});
   }
-  $('testInfo').textContent=(forceFallback()||!srAvailable())
-    ?'ℹ️ For this content the grown-up validates answers with ✓ / ✗.'
-    :'🎤 The child says each answer out loud — the mic checks it. Needs internet + mic permission.';
+  $('testInfo').textContent=(forceFallback()||!srAvailable())?L('testGrown'):L('testMic');
 }
 
 /* ================= wiring ================= */
@@ -883,7 +990,7 @@ $('langSeg').addEventListener('click',e=>{
   const b=e.target.closest('[data-lang]');if(!b)return;
   document.querySelectorAll('#langSeg [data-lang]').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');curLang=b.dataset.lang;
-  renderTopics();refreshFilters();settingsChanged();
+  applyStaticStrings();renderTopics();refreshFilters();settingsChanged();
 });
 $('lenSeg').addEventListener('click',e=>{
   const b=e.target.closest('[data-len]');if(!b)return;
@@ -936,7 +1043,7 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();bigButton();
   }
 });
-renderTopics();refreshFilters();updateModePanels();setIdleUI();
+applyStaticStrings();renderTopics();refreshFilters();updateModePanels();setIdleUI();
 </script>
 </body>
 </html>
