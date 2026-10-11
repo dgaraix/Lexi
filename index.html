@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Lexi — Reading, Spelling, Numbers & Sounds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--coral:#FF6B6B;--sunny:#FFC93C;--grape:#7C5CFC;--teal:#1BC7A8;--sky:#3AA0FF;--ink:#2C2246;--card:#FFF;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;}
+  body{font-family:'Nunito',system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(120% 120% at 50% 0%, #E7F7FF 0%, #E4EEFF 45%, #EFE9FF 100%);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:10px;overflow-x:hidden;}
+  .bar{width:min(560px,100%);display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .menu-btn{font-size:22px;background:#fff;border:3px solid #fff;border-radius:16px;width:48px;height:48px;cursor:pointer;
+    box-shadow:0 6px 16px rgba(90,80,140,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .menu-btn:focus-visible{outline:3px solid var(--grape);outline-offset:2px;}
+  .bar-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:22px;color:var(--grape);}
+  .bar-title .pop{color:var(--coral);}
+  .flag{font-size:24px;cursor:pointer;background:#fff;border-radius:12px;padding:4px 9px;
+    box-shadow:0 6px 16px rgba(90,80,140,.12);border:none;}
+  .chip{margin-left:auto;background:#fff;border-radius:999px;padding:8px 14px;font-family:'Fredoka',sans-serif;
+    font-weight:600;font-size:15px;color:#6A6482;box-shadow:0 6px 16px rgba(90,80,140,.12);
+    display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .sheet-backdrop{position:fixed;inset:0;background:rgba(44,34,70,.35);z-index:90;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .sheet{position:fixed;top:0;left:0;bottom:0;width:min(340px,88vw);background:#fff;z-index:100;
+    box-shadow:8px 0 40px rgba(44,34,70,.25);transform:translateX(-105%);transition:transform .25s ease;
+    padding:18px 18px 30px;overflow-y:auto;border-radius:0 26px 26px 0;}
+  body.menu-open .sheet{transform:translateX(0);}
+  body.menu-open .sheet-backdrop{opacity:1;pointer-events:auto;}
+  .sheet h1{font-family:'Fredoka',sans-serif;font-weight:700;font-size:30px;margin:4px 0 2px;color:var(--grape);}
+  .sheet h1 .pop{color:var(--coral);}
+  .sheet .tagline{font-weight:800;color:#8A83A6;font-size:13px;margin:0 0 14px;}
+  .sheet-close{position:absolute;top:14px;right:14px;font-size:18px;border:none;background:#F1EEFA;color:#6A6482;
+    border-radius:12px;width:38px;height:38px;cursor:pointer;}
+  .sec{margin:16px 0 4px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;color:#B0A9C9;
+    letter-spacing:1px;text-transform:uppercase;}
+  .seg-wrap{display:flex;gap:7px;flex-wrap:wrap;}
+  .seg-btn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;border:3px solid #EBE6F7;background:#fff;
+    color:#6A6482;border-radius:14px;padding:8px 13px;cursor:pointer;transition:all .12s;}
+  .seg-btn.active{border-color:transparent;background:linear-gradient(180deg,#4FB6FF,var(--sky));color:#fff;
+    box-shadow:0 4px 10px rgba(58,160,255,.32);}
+  .seg-btn.len.active{background:linear-gradient(180deg,#FFD86B,var(--sunny));color:#6a5200;box-shadow:0 4px 10px rgba(255,201,60,.4);}
+  .seg-btn.topic{font-size:14px;padding:7px 11px;}
+  .seg-btn.topic.active{background:linear-gradient(180deg,#9B7DFF,var(--grape));color:#fff;box-shadow:0 4px 10px rgba(124,92,252,.32);}
+  .seg-btn.off{opacity:.32;filter:grayscale(.6);cursor:not-allowed;}
+  .seg-btn.off.active{opacity:.75;cursor:pointer;}
+  .seg-btn:focus-visible{outline:3px solid var(--grape);outline-offset:2px;}
+  .filter-hint{margin-top:10px;background:#F1F6FF;border:3px solid #D9E8FF;border-radius:14px;padding:9px 12px;
+    font-weight:800;font-size:13px;color:#4A6FA5;line-height:1.4;}
+  .filter-hint.warn{background:#FFF6E3;border-color:#FFE6AE;color:#8A6D1D;}
+  .num-input{width:64px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:20px;text-align:center;color:var(--ink);
+    border:3px solid #E6E1F5;border-radius:14px;padding:6px 4px;background:#fff;}
+  .num-input:focus{outline:3px solid var(--sky);outline-offset:1px;border-color:var(--sky);}
+  .range-line{display:flex;align-items:center;gap:8px;font-weight:800;color:#5A5476;}
+  .stage{width:min(560px,100%);background:var(--card);border-radius:30px;box-shadow:0 18px 40px rgba(90,80,140,.18);
+    padding:18px 18px 22px;display:flex;flex-direction:column;align-items:center;border:5px solid #fff;position:relative;}
+  .stage.okflash{animation:okf .5s ease;}
+  .stage.badflash{animation:badf .5s ease;}
+  @keyframes okf{0%,100%{box-shadow:0 18px 40px rgba(90,80,140,.18);}40%{box-shadow:0 0 0 8px rgba(27,199,168,.55),0 18px 40px rgba(90,80,140,.18);}}
+  @keyframes badf{0%,100%{box-shadow:0 18px 40px rgba(90,80,140,.18);}40%{box-shadow:0 0 0 8px rgba(255,107,107,.5),0 18px 40px rgba(90,80,140,.18);}}
+  .display{width:100%;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:12px;text-align:center;}
+  .hint{font-family:'Fredoka',sans-serif;font-weight:500;color:#B4AECB;font-size:clamp(18px,4.5vw,24px);line-height:1.35;padding:0 10px;}
+  .hint .big{display:block;font-size:44px;margin-bottom:6px;}
+  .numeral{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(110px,32vw,180px);line-height:.9;margin:0;}
+  .bigtext{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(52px,15vw,110px);line-height:.95;margin:0;
+    letter-spacing:1px;overflow-wrap:anywhere;}
+  .card-icon{font-size:clamp(48px,13vw,84px);line-height:1;}
+  .sub{font-family:'Fredoka',sans-serif;font-weight:600;font-size:clamp(28px,7vw,42px);color:#B7B0CE;margin-top:-4px;}
+  .example{font-family:'Fredoka',sans-serif;font-weight:500;color:#8A83A6;font-size:clamp(16px,4.2vw,21px);
+    display:flex;align-items:center;gap:8px;justify-content:center;}
+  .example b{color:var(--grape);font-weight:600;}
+  .peek{background:#F1EEFA;border:3px dashed #D6CFF0;border-radius:20px;cursor:pointer;
+    font-size:clamp(34px,9vw,56px);line-height:1;padding:10px 22px;transition:transform .1s;}
+  .peek:active{transform:scale(.92);}
+  .peek:focus-visible{outline:3px solid var(--grape);outline-offset:2px;}
+  .cat-tag{display:inline-flex;align-items:center;gap:5px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;
+    padding:4px 12px;border-radius:999px;background:#F1EEFA;color:#7A72A0;}
+  .counters{display:flex;flex-direction:column;gap:6px;align-items:center;}
+  .counter-row{display:flex;gap:6px;justify-content:center;}
+  .pip{font-size:clamp(20px,5.4vw,30px);line-height:1;animation:pip .35s cubic-bezier(.2,1.4,.5,1) backwards;}
+  .counters.small{gap:4px;} .counters.small .counter-row{gap:4px;} .counters.small .pip{font-size:clamp(16px,4.4vw,24px);}
+  .counters.tiny{gap:3px;} .counters.tiny .counter-row{gap:3px;} .counters.tiny .pip{font-size:clamp(13px,3.6vw,19px);}
+  .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;min-height:12px;}
+  .dot{width:11px;height:11px;border-radius:50%;background:#E9E4F6;}
+  .dot.ok{background:var(--teal);} .dot.bad{background:var(--coral);} .dot.now{background:var(--sunny);}
+  .reveal{margin-top:14px;width:min(360px,100%);font-family:'Fredoka',sans-serif;font-weight:700;
+    font-size:clamp(21px,5.3vw,27px);color:#fff;background:linear-gradient(180deg,#FF8A5B 0%, var(--coral) 100%);
+    border:none;border-radius:24px;padding:17px 20px;cursor:pointer;
+    box-shadow:0 9px 0 #D64A55, 0 14px 22px rgba(255,107,107,.35);
+    transition:transform .06s ease, box-shadow .06s ease;display:flex;align-items:center;justify-content:center;gap:10px;flex-shrink:0;}
+  .reveal:active{transform:translateY(7px);box-shadow:0 2px 0 #D64A55,0 5px 12px rgba(255,107,107,.35);}
+  .reveal:focus-visible{outline:4px solid var(--grape);outline-offset:3px;}
+  .reveal.listen{background:linear-gradient(180deg,#4FB6FF,var(--sky));box-shadow:0 9px 0 #2C7FD6,0 14px 22px rgba(58,160,255,.35);}
+  .reveal.listen:active{box-shadow:0 2px 0 #2C7FD6,0 5px 12px rgba(58,160,255,.35);}
+  .reveal.listening{background:linear-gradient(180deg,#2FD9BB,var(--teal));box-shadow:0 9px 0 #12987F,0 14px 22px rgba(27,199,168,.35);animation:pulse 1s infinite;}
+  @keyframes pulse{50%{transform:scale(1.02);}}
+  .row-btns{display:flex;gap:10px;margin-top:12px;width:min(360px,100%);}
+  .mini{flex:1;font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;border:none;border-radius:18px;
+    padding:13px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+    transition:transform .06s ease, box-shadow .06s ease;color:#fff;flex-shrink:0;}
+  .mini:active{transform:translateY(4px);}
+  .mini:focus-visible{outline:4px solid var(--ink);outline-offset:3px;}
+  .hear{background:linear-gradient(180deg,#4FB6FF,var(--sky));box-shadow:0 6px 0 #2C7FD6;}
+  .hear:active{box-shadow:0 2px 0 #2C7FD6;}
+  .prev{background:linear-gradient(180deg,#C9C3DE,#A79FC6);box-shadow:0 6px 0 #7E759F;flex:0 0 92px;}
+  .prev:active{box-shadow:0 2px 0 #7E759F;}
+  .mark-right{background:linear-gradient(180deg,#2FD9BB,var(--teal));box-shadow:0 6px 0 #12987F;font-size:19px;}
+  .mark-right:active{box-shadow:0 2px 0 #12987F;}
+  .mark-wrong{background:linear-gradient(180deg,#FF9A9A,#F2707C);box-shadow:0 6px 0 #C9505F;font-size:19px;}
+  .mark-wrong:active{box-shadow:0 2px 0 #C9505F;}
+  .mini:disabled{opacity:.4;cursor:default;transform:none;}
+  .word{min-height:28px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:clamp(22px,5.6vw,32px);
+    color:var(--grape);text-transform:capitalize;letter-spacing:.5px;margin-top:2px;}
+  .hidden{display:none!important;}
+  .panel{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .panel .big-emoji{font-size:56px;}
+  .panel h2{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(24px,6.5vw,34px);margin:0;color:var(--grape);}
+  .panel .scoreline{font-family:'Fredoka',sans-serif;font-weight:600;font-size:20px;color:#6A6482;}
+  .practice{background:#FFF6E3;border:3px solid #FFE6AE;border-radius:16px;padding:10px 16px;font-weight:800;
+    color:#8A6D1D;font-size:15px;max-width:100%;}
+  .practice b{font-family:'Fredoka',sans-serif;font-weight:600;color:#C77800;}
+  .srnote{font-weight:800;font-size:13px;color:#8A83A6;margin-top:8px;text-align:center;}
+  @keyframes pip{from{opacity:0;transform:scale(0) rotate(-25deg);}}
+  @keyframes popin{0%{opacity:0;transform:scale(.3) rotate(-8deg);}60%{transform:scale(1.12) rotate(2deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+  .animate-pop{animation:popin .5s cubic-bezier(.2,1.3,.4,1) both;}
+  .confetti{position:fixed;top:-20px;width:12px;height:16px;border-radius:3px;z-index:50;pointer-events:none;}
+  .fw{position:fixed;width:9px;height:9px;border-radius:50%;z-index:60;pointer-events:none;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <button class="menu-btn" id="menuBtn" aria-label="Open settings menu">☰</button>
+    <span class="bar-title"><span class="pop">Lexi</span></span>
+    <button class="flag" id="flagEl" aria-label="Language — open settings">🇺🇸</button>
+    <span class="chip" id="turnChip">⭐ <span id="chipText">0</span></span>
+  </div>
+
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <nav class="sheet" id="menuSheet" aria-label="Settings">
+    <button class="sheet-close" id="menuClose" aria-label="Close menu">✕</button>
+    <h1><span class="pop">Lexi</span></h1>
+    <p class="tagline">Numbers, letters & sounds — say it out loud 🗣️</p>
+
+    <div class="sec">Language</div>
+    <div class="seg-wrap" id="langSeg">
+      <button class="seg-btn active" data-lang="en">🇺🇸 English</button>
+      <button class="seg-btn" data-lang="fr">🇫🇷 Français</button>
+      <button class="seg-btn" data-lang="es">🇪🇸 Español</button>
+    </div>
+
+    <div class="sec">Game</div>
+    <div class="seg-wrap" id="modeSeg">
+      <button class="seg-btn active" id="tabNum" data-mode="num">🔢 Numbers</button>
+      <button class="seg-btn" id="tabLet" data-mode="let">🔠 Words</button>
+      <button class="seg-btn" id="tabSnd" data-mode="snd">🗣️ Sounds</button>
+    </div>
+
+    <div id="numControls">
+      <div class="sec">Number range</div>
+      <div class="range-line">
+        <label for="min">From</label>
+        <input id="min" class="num-input" type="number" inputmode="numeric" value="1" min="1" max="100" />
+        <span>–</span>
+        <label for="max">To</label>
+        <input id="max" class="num-input" type="number" inputmode="numeric" value="30" min="1" max="100" />
+      </div>
+    </div>
+
+    <div id="letterControls" class="hidden">
+      <div class="sec">Length</div>
+      <div class="seg-wrap" id="lenSeg">
+        <button class="seg-btn len" data-len="1">1</button>
+        <button class="seg-btn len active" data-len="2">2</button>
+        <button class="seg-btn len" data-len="3">3</button>
+        <button class="seg-btn len" data-len="4">4</button>
+        <button class="seg-btn len" data-len="5">5</button>
+        <button class="seg-btn len" data-len="6">6</button>
+        <button class="seg-btn len" data-len="7">7+</button>
+      </div>
+      <div class="seg-wrap" id="lenModeSeg" style="margin-top:7px;">
+        <button class="seg-btn active" data-lm="eq">🎯 Exactly</button>
+        <button class="seg-btn" data-lm="ge">➕ Or more</button>
+      </div>
+      <div class="sec">Pictures</div>
+      <div class="seg-wrap" id="picSeg">
+        <button class="seg-btn active" data-pic="show">🖼️ Show</button>
+        <button class="seg-btn" data-pic="reveal">🎁 Tap to reveal</button>
+        <button class="seg-btn" data-pic="hide">🙈 Hide</button>
+      </div>
+      <div class="sec">Topics</div>
+      <div class="seg-wrap" id="topicSeg"></div>
+      <div class="filter-hint hidden" id="filterHint"></div>
+    </div>
+
+    <div id="soundControls" class="hidden">
+      <div class="filter-hint" id="soundInfo"></div>
+    </div>
+
+    <div class="sec">Mode</div>
+    <div class="seg-wrap" id="playModeSeg">
+      <button class="seg-btn active" data-pm="train">🏋️ Practice</button>
+      <button class="seg-btn" data-pm="test">🎓 Test</button>
+    </div>
+    <div id="testControls" class="hidden">
+      <div class="sec">Test questions</div>
+      <div class="seg-wrap" id="testLenSeg">
+        <button class="seg-btn active" data-tn="10">10</button>
+        <button class="seg-btn" data-tn="20">20</button>
+        <button class="seg-btn" data-tn="30">30</button>
+      </div>
+      <div class="filter-hint" id="testInfo"></div>
+    </div>
+  </nav>
+
+  <main class="stage" id="stage">
+    <div class="display" id="display" aria-live="polite">
+      <div class="hint"><span class="big">👋🐣</span>Ready when you are!<br>Tap the big button below.</div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="word" id="wordEl" aria-hidden="true"></div>
+    <button class="reveal" id="revealBtn"><span id="revealIcon">🎲</span> <span id="revealText">Give me one!</span></button>
+    <div class="row-btns" id="trainBtns">
+      <button class="mini prev" id="prevBtn" disabled>⬅️ Back</button>
+      <button class="mini hear" id="hearBtn" disabled>🔊 Hear it</button>
+    </div>
+    <div class="row-btns hidden" id="fallbackBtns">
+      <button class="mini mark-right" id="markRight">✓ Got it!</button>
+      <button class="mini mark-wrong" id="markWrong">✗ Not yet</button>
+    </div>
+    <div class="srnote hidden" id="srNote"></div>
+  </main>
+<script>
+
+/* ================= audio + effects ================= */
+let audioCtx=null;
+function ac(){ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume(); return audioCtx; }
+function tone(freqs,type,vol,dur,gap){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  try{ const a=ac(),t=a.currentTime;
+    freqs.forEach((f,i)=>{ const o=a.createOscillator(),g=a.createGain();
+      o.type=type;o.frequency.value=f;const s=t+i*gap;
+      g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(vol,s+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,s+dur);
+      o.connect(g).connect(a.destination);o.start(s);o.stop(s+dur+0.02);});
+  }catch(e){}
+}
+function playPop(){ tone([523.25,659.25,783.99],'triangle',0.25,0.18,0.07);
+  try{ const a=ac(),t=a.currentTime,o=a.createOscillator(),g=a.createGain();
+    o.type='sine';o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(420,t+0.12);
+    g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+    o.connect(g).connect(a.destination);o.start(t);o.stop(t+0.24);}catch(e){} }
+function playRight(){ tone([659.25,880,1046.5],'triangle',0.28,0.16,0.06); }
+function playWrong(){ tone([330,262],'sine',0.18,0.22,0.12); }
+function playFanfare(){ tone([523,659,784,1047,1319],'triangle',0.3,0.25,0.09); }
+function confettiBurst(c){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cols=[c,'#FFC93C','#1BC7A8','#7C5CFC','#FF6B6B'];
+  for(let i=0;i<14;i++){ const d=document.createElement('div');d.className='confetti';
+    d.style.left=(10+Math.random()*80)+'%';d.style.background=cols[i%cols.length];
+    d.style.transform='rotate('+(Math.random()*360)+'deg)';document.body.appendChild(d);
+    const dur=900+Math.random()*700;
+    d.animate([{transform:'translateY(0) rotate(0)',opacity:1},
+      {transform:'translateY('+(window.innerHeight+60)+'px) rotate('+(360+Math.random()*360)+'deg)',opacity:.9}],
+      {duration:dur,easing:'ease-in'});
+    setTimeout(()=>d.remove(),dur); } }
+/* fireworks for passed tests (R16): rockets burst from points, particles fly outward */
+function fireworks(level){                       // 1 = pass (>=80%), 2 = perfect (100%)
+  document.body.dataset.fireworks=String(level); // testable marker
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const bursts=level===2?10:4, span=level===2?2600:1400;
+  const cols=['#FF6B6B','#FFC93C','#1BC7A8','#7C5CFC','#3AA0FF','#FF8A5B','#E8478B'];
+  for(let b=0;b<bursts;b++){
+    setTimeout(()=>{
+      const x=(15+Math.random()*70)/100*window.innerWidth;
+      const y=(10+Math.random()*40)/100*window.innerHeight;
+      const col=cols[b%cols.length], n=level===2?26:18;
+      playFanfare();
+      for(let i=0;i<n;i++){
+        const p=document.createElement('div');p.className='fw';
+        p.style.left=x+'px';p.style.top=y+'px';p.style.background=Math.random()<.3?'#fff':col;
+        document.body.appendChild(p);
+        const ang=(i/n)*Math.PI*2+Math.random()*.3, dist=60+Math.random()*(level===2?150:100);
+        const dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist+40;
+        const dur=700+Math.random()*500;
+        p.animate([{transform:'translate(0,0) scale(1)',opacity:1},
+                   {transform:'translate('+dx+'px,'+dy+'px) scale(.2)',opacity:0}],
+                  {duration:dur,easing:'cubic-bezier(.1,.8,.4,1)'});
+        setTimeout(()=>p.remove(),dur);
+      }
+    }, Math.random()*span);
+  }
+}
+/* speech synthesis (device TTS — no stored audio) */
+let VOICES=[];
+function loadVoices(){try{VOICES=window.speechSynthesis.getVoices()||[];}catch(e){}}
+loadVoices(); if('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged=loadVoices;
+function speak(text,lang,rate){ try{ window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=rate||0.85;u.pitch=1.1;
+  const v=VOICES.find(v=>v.lang===lang)||VOICES.find(v=>v.lang&&v.lang.slice(0,2)===lang.slice(0,2));
+  if(v)u.voice=v; window.speechSynthesis.speak(u); }catch(e){} }
+
+const $=id=>document.getElementById(id);
+
+/* ================= numbers in three languages (R13.4) ================= */
+const N_EN={ones:['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],
+  tens:['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety']};
+const N_FR=['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
+const N_FR_T={2:'vingt',3:'trente',4:'quarante',5:'cinquante',6:'soixante'};
+const N_ES=['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince'];
+const N_ES_16=['dieciséis','diecisiete','dieciocho','diecinueve'];
+const N_ES_21=['veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'];
+const N_ES_T={3:'treinta',4:'cuarenta',5:'cincuenta',6:'sesenta',7:'setenta',8:'ochenta',9:'noventa'};
+function numFR(n){
+  if(n===100)return 'cent';
+  if(n<17)return N_FR[n];
+  if(n<20)return 'dix-'+N_FR[n-10];
+  if(n<70){const t=Math.floor(n/10),o=n%10;
+    return o===0?N_FR_T[t]:(o===1?N_FR_T[t]+' et un':N_FR_T[t]+'-'+N_FR[o]);}
+  if(n<80){return n===71?'soixante et onze':'soixante-'+numFR(n-60);}
+  const r=n-80;
+  if(r===0)return 'quatre-vingts';
+  return 'quatre-vingt-'+numFR(r);
+}
+function numES(n){
+  if(n===100)return 'cien';
+  if(n<16)return N_ES[n];
+  if(n<20)return N_ES_16[n-16];
+  if(n===20)return 'veinte';
+  if(n<30)return N_ES_21[n-21];
+  const t=Math.floor(n/10),o=n%10;
+  return o===0?N_ES_T[t]:N_ES_T[t]+' y '+N_ES[o];
+}
+function numEN(n){
+  if(n===100)return 'one hundred';
+  if(n<20)return N_EN.ones[n];
+  const t=Math.floor(n/10),o=n%10;
+  return o===0?N_EN.tens[t]:N_EN.tens[t]+'-'+N_EN.ones[o];
+}
+function numberToWords(n,lang){ return lang==='fr'?numFR(n):lang==='es'?numES(n):numEN(n); }
+
+/* ================= data ================= */
+/* Topic categories — localized, with fun emoji (R11) */
+const CATS=[
+ {id:'animals', e:'🐾', en:'Animals',        fr:'Animaux',        es:'Animales'},
+ {id:'space',   e:'🚀', en:'Space',          fr:'Espace',         es:'Espacio'},
+ {id:'body',    e:'🫀', en:'Body',           fr:'Le corps',       es:'El cuerpo'},
+ {id:'science', e:'🔬', en:'Science',        fr:'Sciences',       es:'Ciencias'},
+ {id:'nature',  e:'🌦️', en:'Nature',        fr:'Nature',         es:'Naturaleza'},
+ {id:'home',    e:'🏠', en:'Home',           fr:'Maison',         es:'Casa'},
+ {id:'food',    e:'🍎', en:'Food',           fr:'Nourriture',     es:'Comida'},
+ {id:'play',    e:'⚽', en:'Sports & play',  fr:'Sports & jeux',  es:'Deportes y juegos'},
+ {id:'fantasy', e:'🐉', en:'Fantasy',        fr:'Fantastique',    es:'Fantasía'},
+ {id:'feel',    e:'😊', en:'Feelings',       fr:'Émotions',       es:'Emociones'},
+ {id:'school',  e:'🎒', en:'School',         fr:'École',          es:'Escuela'},
+ {id:'places',  e:'🗺️', en:'Places',        fr:'Lieux',          es:'Lugares'},
+ {id:'clothes', e:'👕', en:'Clothes',        fr:'Vêtements',      es:'Ropa'},
+ {id:'transport',e:'🚗', en:'Transport',      fr:'Transports',     es:'Transporte'},
+ {id:'jobs',    e:'👷', en:'Jobs',           fr:'Métiers',        es:'Oficios'},
+ {id:'little',  e:'🔤', en:'Little words',   fr:'Petits mots',    es:'Palabritas'}
+];
+/* Word: [text, icon, gloss]  (gloss empty for English) */
+const DATA={
+en:{ name:'English', lang:'en-US',
+ badge:{letter:'letter',word:'word',sound:'sound',asin:'as in'},
+ letters:'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(' '),
+ words:{
+ animals:[['cat','🐱',''],['dog','🐶',''],['fox','🦊',''],['owl','🦉',''],['bee','🐝',''],['ant','🐜',''],['bat','🦇',''],['pig','🐷',''],['hen','🐔',''],['cow','🐄',''],['duck','🦆',''],['bear','🐻',''],['lion','🦁',''],['wolf','🐺',''],['goat','🐐',''],['crab','🦀',''],['deer','🦌',''],['frog','🐸',''],['fish','🐟',''],['bird','🐦',''],['mouse','🐭',''],['horse','🐴',''],['tiger','🐯',''],['snake','🐍',''],['whale','🐳',''],['shark','🦈',''],['zebra','🦓',''],['panda','🐼',''],['sheep','🐑',''],['snail','🐌',''],['rabbit','🐰',''],['monkey','🐵',''],['turtle','🐢',''],['spider','🕷️',''],['donkey','🫏',''],['kitten','🐱',''],['puppy','🐶',''],['parrot','🦜',''],['eagle','🦅',''],['lizard','🦎',''],['camel','🐫',''],['koala','🐨',''],['otter','🦦',''],['beaver','🦫',''],['squirrel','🐿️',''],['raccoon','🦝',''],['moose','🫎',''],['toad','🐸',''],['crow','🐦‍⬛',''],['swan','🦢',''],['goose','🪿',''],['giraffe','🦒',''],['dolphin','🐬',''],['penguin','🐧',''],['elephant','🐘',''],['octopus','🐙',''],['hamster','🐹','']],
+ space:[['sun','☀️',''],['moon','🌙',''],['star','⭐',''],['mars','🔴',''],['venus','🟠',''],['earth','🌍',''],['comet','☄️',''],['planet','🪐',''],['rocket','🚀',''],['galaxy','🌌',''],['meteor','☄️',''],['gravity','🍎',''],['orbit','🔄',''],['alien','👽',''],['saturn','🪐',''],['jupiter','🟤',''],['neptune','🔵',''],['mercury','⚪',''],['eclipse','🌑',''],['crater','🕳️',''],['astronaut','👨‍🚀',''],['telescope','🔭',''],['satellite','📡',''],['universe','🌌',''],['spaceship','🛸','']],
+ body:[['arm','💪',''],['leg','🦵',''],['ear','👂',''],['eye','👁️',''],['toe','🦶',''],['jaw','',''],['hand','✋',''],['foot','🦶',''],['knee','',''],['head','',''],['hair','💇',''],['nose','👃',''],['mouth','👄',''],['teeth','🦷',''],['tooth','🦷',''],['elbow','',''],['wrist','',''],['ankle','',''],['finger','👆',''],['thumb','👍',''],['shoulder','',''],['stomach','',''],['muscle','💪',''],['bone','🦴',''],['brain','🧠',''],['heart','❤️',''],['lungs','🫁',''],['skin','',''],['blood','🩸',''],['cheek','',''],['chin','',''],['eyebrow','','']],
+ science:[['atom','⚛️',''],['cell','🧫',''],['magnet','🧲',''],['energy','⚡',''],['fossil','🦴',''],['volcano','🌋',''],['lava','🌋',''],['crystal','💎',''],['metal','⚙️',''],['liquid','💧',''],['solid','🧊',''],['steam','♨️',''],['bubble','🫧',''],['battery','🔋',''],['circuit','🔌',''],['robot','🤖',''],['machine','⚙️',''],['engine','🚂',''],['microscope','🔬',''],['experiment','🧪',''],['invention','💡',''],['dinosaur','🦕',''],['scientist','🥼',''],['laboratory','🧪','']],
+ nature:[['rain','🌧️',''],['snow','❄️',''],['wind','💨',''],['storm','⛈️',''],['cloud','☁️',''],['river','🏞️',''],['ocean','🌊',''],['beach','🏖️',''],['forest','🌲',''],['desert','🏜️',''],['island','🏝️',''],['mountain','⛰️',''],['valley','🏞️',''],['meadow','🌼',''],['pond','🪷',''],['lake','🏞️',''],['waterfall','💦',''],['thunder','🌩️',''],['lightning','⚡',''],['rainbow','🌈',''],['sunrise','🌅',''],['sunset','🌇',''],['spring','🌷',''],['summer','☀️',''],['autumn','🍂',''],['winter','⛄',''],['breeze','🍃',''],['fog','🌫️',''],['frost','❄️',''],['ice','🧊',''],['mud','🟤',''],['sand','🏖️',''],['seed','🌱',''],['root','🌱',''],['stem','🌿',''],['leaf','🍃',''],['branch','🌳',''],['flower','🌸',''],['grass','🌿',''],['tree','🌳','']],
+ home:[['bed','🛏️',''],['door','🚪',''],['lamp','💡',''],['sofa','🛋️',''],['chair','🪑',''],['table','🪑',''],['window','🪟',''],['kitchen','🍳',''],['bedroom','🛏️',''],['garden','🏡',''],['garage','🚗',''],['mirror','🪞',''],['pillow','',''],['blanket','',''],['carpet','',''],['curtain','',''],['shelf','📚',''],['drawer','',''],['spoon','🥄',''],['fork','🍴',''],['plate','🍽️',''],['bowl','🥣',''],['cup','☕',''],['oven','',''],['fridge','🧊',''],['sink','🚰',''],['soap','🧼',''],['towel','',''],['broom','🧹',''],['bucket','🪣',''],['ladder','🪜',''],['key','🔑',''],['clock','🕐','']],
+ food:[['jam','🍓',''],['pie','🥧',''],['egg','🥚',''],['rice','🍚',''],['soup','🍲',''],['bread','🍞',''],['cheese','🧀',''],['apple','🍎',''],['grape','🍇',''],['lemon','🍋',''],['peach','🍑',''],['melon','🍈',''],['mango','🥭',''],['cherry','🍒',''],['banana','🍌',''],['orange','🍊',''],['tomato','🍅',''],['potato','🥔',''],['carrot','🥕',''],['onion','🧅',''],['pepper','🫑',''],['salad','🥗',''],['pasta','🍝',''],['pizza','🍕',''],['taco','🌮',''],['cookie','🍪',''],['muffin','🧁',''],['pancake','🥞',''],['waffle','🧇',''],['honey','🍯',''],['sugar','🍬',''],['butter','🧈',''],['yogurt','🥛',''],['cereal','🥣',''],['sandwich','🥪',''],['popcorn','🍿',''],['pretzel','🥨',''],['chocolate','🍫',''],['milk','🥛',''],['juice','🧃','']],
+ play:[['run','🏃',''],['jump','🤸',''],['swim','🏊',''],['dance','💃',''],['sing','🎤',''],['draw','✏️',''],['paint','🎨',''],['read','📖',''],['climb','🧗',''],['skate','⛸️',''],['race','🏁',''],['ride','🚴',''],['soccer','⚽',''],['tennis','🎾',''],['hockey','🏒',''],['karate','🥋',''],['ballet','🩰',''],['chess','♟️',''],['puzzle','🧩',''],['kite','🪁',''],['drum','🥁',''],['piano','🎹',''],['guitar','🎸',''],['violin','🎻',''],['camping','🏕️',''],['fishing','🎣',''],['hiking','🥾',''],['swing','',''],['slide','🛝',''],['marbles','',''],['basketball','🏀',''],['baseball','⚾','']],
+ fantasy:[['king','🤴',''],['queen','👸',''],['crown','👑',''],['magic','✨',''],['witch','🧙‍♀️',''],['wizard','🧙',''],['fairy','🧚',''],['giant','🗿',''],['troll','',''],['ogre','',''],['elf','🧝',''],['dwarf','',''],['knight','🛡️',''],['sword','⚔️',''],['shield','🛡️',''],['castle','🏰',''],['tower','🗼',''],['dungeon','',''],['dragon','🐉',''],['unicorn','🦄',''],['mermaid','🧜‍♀️',''],['pirate','🏴‍☠️',''],['treasure','💰',''],['chest','🧰',''],['potion','🧪',''],['spell','✨',''],['wand','🪄',''],['cloak','🧥',''],['quest','🗺️',''],['hero','🦸',''],['monster','👾',''],['ghost','👻',''],['goblin','',''],['phoenix','🔥',''],['prince','🤴',''],['princess','👸',''],['kingdom','🏰',''],['throne','🪑','']],
+ feel:[['happy','😊',''],['sad','😢',''],['angry','😠',''],['scared','😨',''],['brave','🦁',''],['shy','😳',''],['proud','😌',''],['calm','😌',''],['silly','🤪',''],['grumpy','😾',''],['excited','🤩',''],['nervous','😬',''],['jealous','😒',''],['curious','🧐',''],['cheerful','😄',''],['friendly','🤝',''],['gentle','🕊️',''],['honest','💯',''],['kind','💗',''],['lonely','🕯️',''],['surprised','😲',''],['worried','😟',''],['thankful','🙏',''],['patient','⏳','']],
+ school:[['pen','🖊️',''],['book','📖',''],['desk','',''],['chalk','',''],['paper','📄',''],['pencil','✏️',''],['eraser','',''],['crayon','🖍️',''],['marker','🖊️',''],['ruler','📏',''],['glue','',''],['scissors','✂️',''],['backpack','🎒',''],['notebook','📓',''],['teacher','🧑‍🏫',''],['student','🧑‍🎓',''],['lesson','',''],['recess','🛝',''],['library','📚',''],['math','➕',''],['reading','📖',''],['spelling','🔤',''],['homework','📝',''],['classroom','🏫',''],['alphabet','🔤',''],['number','🔢',''],['letter','🔡',''],['word','💬',''],['story','📖',''],['poem','📜','']],
+ places:[['city','🏙️',''],['town','🏘️',''],['farm','🚜',''],['park','🌳',''],['zoo','🦓',''],['museum','🏛️',''],['circus','🎪',''],['bridge','🌉',''],['street','🛣️',''],['road','🛣️',''],['tunnel','🚇',''],['harbor','⚓',''],['airport','✈️',''],['station','🚉',''],['bakery','🥐',''],['market','🛒',''],['hospital','🏥',''],['theater','🎭',''],['stadium','🏟️',''],['village','🏘️',''],['country','🌍',''],['map','🗺️','']],
+ clothes:[['hat','🎩',''],['cap','🧢',''],['sock','🧦',''],['shoe','👟',''],['boot','🥾',''],['coat','🧥',''],['scarf','🧣',''],['glove','🧤',''],['dress','👗',''],['shirt','👕',''],['pants','👖',''],['shorts','🩳',''],['skirt','👗',''],['jacket','🧥',''],['sweater','🧶',''],['pajamas','🛌',''],['mitten','🧤',''],['belt','',''],['button','🔘',''],['zipper','',''],['pocket','','']],
+ transport:[['car','🚗',''],['bus','🚌',''],['jet','✈️',''],['van','🚐',''],['ship','🚢',''],['boat','⛵',''],['truck','🚚',''],['train','🚂',''],['plane','✈️',''],['canoe','🛶',''],['ferry','⛴️',''],['subway','🚇',''],['tractor','🚜',''],['scooter','🛴',''],['bicycle','🚲',''],['sailboat','⛵',''],['airplane','✈️',''],['helicopter','🚁',''],['motorcycle','🏍️',''],['wagon','',''],['sled','🛷','']],
+ jobs:[['vet','🩺',''],['chef','👨‍🍳',''],['nurse','🧑‍⚕️',''],['doctor','🩺',''],['farmer','👨‍🌾',''],['baker','🥖',''],['pilot','✈️',''],['police','👮',''],['firefighter','🧑‍🚒',''],['dentist','🦷',''],['artist','🎨',''],['singer','🎤',''],['dancer','💃',''],['builder','👷',''],['plumber','🔧',''],['mailman','📬',''],['judge','⚖️',''],['actor','🎭',''],['coach','📣',''],['waiter','🍽️',''],['barber','💈','']],
+ little:[['ox','🐂',''],['up','⬆️',''],['go','🏁',''],['hi','👋',''],['no','🚫',''],['me','🙋',''],['we','',''],['he','',''],['my','',''],['by','',''],['at','',''],['in','',''],['on','',''],['it','',''],['is','',''],['us','',''],['the','',''],['and','',''],['was','',''],['you','',''],['are','',''],['for','',''],['one','1️⃣',''],['two','2️⃣',''],['who','',''],['what','',''],['when','',''],['said','💬',''],['have','',''],['this','',''],['that','',''],['with','',''],['from','',''],['they','',''],['were','',''],['been','',''],['your','',''],['some','',''],['come','',''],['here','📍',''],['there','',''],['where','','']]
+ },
+ sounds:{
+ 2:[['sh','ship','🚢'],['ch','cheese','🧀'],['th','thumb','👍'],['wh','whale','🐳'],['ck','duck','🦆'],['ng','ring','💍'],['ph','phone','📱'],['qu','queen','👑'],['ai','rain','🌧️'],['ay','day','☀️'],['ee','tree','🌳'],['ea','sea','🌊'],['oa','boat','⛵'],['ow','cow','🐄'],['oo','moon','🌙'],['oi','coin','🪙'],['oy','toy','🧸'],['ar','car','🚗'],['or','corn','🌽'],['er','tiger','🐯'],['ir','bird','🐦'],['ur','turtle','🐢'],['aw','paw','🐾'],['ew','dew','💧']],
+ 3:[['igh','light','💡'],['air','chair','🪑'],['ear','ear','👂'],['tch','watch','⌚']]
+ }
+},
+fr:{ name:'Français', lang:'fr-FR',
+ badge:{letter:'lettre',word:'mot',sound:'son',asin:'comme dans'},
+ letters:'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z É È'.split(' '),
+ words:{
+ animals:[['chat','🐱','cat'],['chien','🐕','dog'],['loup','🐺','wolf'],['ours','🐻','bear'],['lion','🦁','lion'],['tigre','🐯','tiger'],['singe','🐒','monkey'],['lapin','🐰','rabbit'],['vache','🐄','cow'],['mouton','🐑','sheep'],['cheval','🐴','horse'],['canard','🦆','duck'],['souris','🐭','mouse'],['girafe','🦒','giraffe'],['requin','🦈','shark'],['baleine','🐳','whale'],['dauphin','🐬','dolphin'],['renard','🦊','fox'],['hibou','🦉','owl'],['abeille','🐝','bee'],['fourmi','🐜','ant'],['grenouille','🐸','frog'],['tortue','🐢','turtle'],['araignée','🕷️','spider'],['écureuil','🐿️','squirrel'],['éléphant','🐘','elephant'],['pingouin','🐧','penguin'],['serpent','🐍','snake'],['cochon','🐷','pig'],['poule','🐔','hen'],['oiseau','🐦','bird'],['poisson','🐟','fish'],['âne','🫏','donkey'],['coq','🐓','rooster'],['chèvre','🐐','goat']],
+ space:[['lune','🌙','moon'],['soleil','☀️','sun'],['étoile','⭐','star'],['terre','🌍','Earth'],['mars','🔴','Mars'],['planète','🪐','planet'],['fusée','🚀','rocket'],['comète','☄️','comet'],['galaxie','🌌','galaxy'],['orbite','🔄','orbit'],['astronaute','👨‍🚀','astronaut'],['télescope','🔭','telescope'],['satellite','📡','satellite'],['univers','🌌','universe'],['météore','☄️','meteor'],['éclipse','🌑','eclipse'],['saturne','🪐','Saturn'],['jupiter','🟤','Jupiter']],
+ body:[['bras','💪','arm'],['jambe','🦵','leg'],['main','✋','hand'],['pied','🦶','foot'],['tête','','head'],['nez','👃','nose'],['bouche','👄','mouth'],['oreille','👂','ear'],['œil','👁️','eye'],['dent','🦷','tooth'],['cou','','neck'],['dos','','back'],['ventre','','belly'],['genou','','knee'],['coude','','elbow'],['épaule','','shoulder'],['cheville','','ankle'],['doigt','👆','finger'],['pouce','👍','thumb'],['cheveux','💇','hair'],['cerveau','🧠','brain'],['cœur','❤️','heart'],['poumon','🫁','lung'],['os','🦴','bone'],['peau','','skin'],['sang','🩸','blood'],['menton','','chin'],['joue','','cheek'],['sourcil','','eyebrow']],
+ science:[['atome','⚛️','atom'],['aimant','🧲','magnet'],['énergie','⚡','energy'],['fossile','🦴','fossil'],['volcan','🌋','volcano'],['lave','🌋','lava'],['cristal','💎','crystal'],['métal','⚙️','metal'],['liquide','💧','liquid'],['solide','🧊','solid'],['vapeur','♨️','steam'],['bulle','🫧','bubble'],['pile','🔋','battery'],['robot','🤖','robot'],['machine','⚙️','machine'],['moteur','🚂','engine'],['microscope','🔬','microscope'],['expérience','🧪','experiment'],['invention','💡','invention'],['dinosaure','🦕','dinosaur']],
+ nature:[['pluie','🌧️','rain'],['neige','❄️','snow'],['vent','💨','wind'],['orage','⛈️','storm'],['nuage','☁️','cloud'],['rivière','🏞️','river'],['océan','🌊','ocean'],['plage','🏖️','beach'],['forêt','🌲','forest'],['désert','🏜️','desert'],['île','🏝️','island'],['montagne','⛰️','mountain'],['vallée','🏞️','valley'],['étang','🪷','pond'],['lac','🏞️','lake'],['cascade','💦','waterfall'],['tonnerre','🌩️','thunder'],['éclair','⚡','lightning'],['saison','🍂','season'],['printemps','🌷','spring'],['été','☀️','summer'],['automne','🍂','autumn'],['hiver','⛄','winter'],['brouillard','🌫️','fog'],['glace','🧊','ice'],['boue','🟤','mud'],['sable','🏖️','sand'],['graine','🌱','seed'],['racine','🌱','root'],['feuille','🍃','leaf'],['branche','🌳','branch'],['fleur','🌸','flower'],['herbe','🌿','grass'],['arbre','🌳','tree']],
+ home:[['lit','🛏️','bed'],['porte','🚪','door'],['lampe','💡','lamp'],['canapé','🛋️','sofa'],['chaise','🪑','chair'],['table','🪑','table'],['fenêtre','🪟','window'],['cuisine','🍳','kitchen'],['chambre','🛏️','bedroom'],['jardin','🏡','garden'],['garage','🚗','garage'],['miroir','🪞','mirror'],['oreiller','','pillow'],['couverture','','blanket'],['tapis','','rug'],['rideau','','curtain'],['étagère','📚','shelf'],['tiroir','','drawer'],['cuillère','🥄','spoon'],['fourchette','🍴','fork'],['assiette','🍽️','plate'],['bol','🥣','bowl'],['four','','oven'],['frigo','🧊','fridge'],['évier','🚰','sink'],['savon','🧼','soap'],['serviette','','towel'],['balai','🧹','broom'],['seau','🪣','bucket'],['échelle','🪜','ladder'],['clé','🔑','key'],['horloge','🕐','clock']],
+ food:[['pain','🍞','bread'],['riz','🍚','rice'],['soupe','🍲','soup'],['fromage','🧀','cheese'],['pomme','🍎','apple'],['raisin','🍇','grape'],['citron','🍋','lemon'],['pêche','🍑','peach'],['melon','🍈','melon'],['mangue','🥭','mango'],['cerise','🍒','cherry'],['banane','🍌','banana'],['orange','🍊','orange'],['tomate','🍅','tomato'],['patate','🥔','potato'],['carotte','🥕','carrot'],['oignon','🧅','onion'],['salade','🥗','salad'],['pâtes','🍝','pasta'],['pizza','🍕','pizza'],['biscuit','🍪','cookie'],['crêpe','🥞','crepe'],['gaufre','🧇','waffle'],['miel','🍯','honey'],['sucre','🍬','sugar'],['beurre','🧈','butter'],['yaourt','🥛','yogurt'],['céréales','🥣','cereal'],['chocolat','🍫','chocolate'],['jus','🧃','juice'],['lait','🥛','milk'],['œuf','🥚','egg'],['gâteau','🍰','cake'],['tarte','🥧','pie'],['fraise','🍓','strawberry'],['framboise','','raspberry']],
+ play:[['courir','🏃','to run'],['sauter','🤸','to jump'],['nager','🏊','to swim'],['danser','💃','to dance'],['chanter','🎤','to sing'],['dessiner','✏️','to draw'],['peindre','🎨','to paint'],['lire','📖','to read'],['grimper','🧗','to climb'],['patiner','⛸️','to skate'],['course','🏁','race'],['vélo','🚲','bike'],['foot','⚽','soccer'],['tennis','🎾','tennis'],['hockey','🏒','hockey'],['karaté','🥋','karate'],['échecs','♟️','chess'],['puzzle','🧩','puzzle'],['tambour','🥁','drum'],['piano','🎹','piano'],['guitare','🎸','guitar'],['violon','🎻','violin'],['camping','🏕️','camping'],['pêcher','🎣','to fish'],['randonnée','🥾','hiking'],['balançoire','','swing'],['toboggan','🛝','slide'],['corde','🪢','rope'],['billes','','marbles']],
+ fantasy:[['roi','👑','king'],['reine','👸','queen'],['couronne','👑','crown'],['magie','✨','magic'],['sorcière','🧙‍♀️','witch'],['magicien','🧙','wizard'],['fée','🧚','fairy'],['géant','🗿','giant'],['troll','','troll'],['ogre','','ogre'],['elfe','🧝','elf'],['nain','','dwarf'],['chevalier','🛡️','knight'],['épée','⚔️','sword'],['bouclier','🛡️','shield'],['château','🏰','castle'],['tour','🗼','tower'],['donjon','','dungeon'],['dragon','🐉','dragon'],['licorne','🦄','unicorn'],['sirène','🧜‍♀️','mermaid'],['pirate','🏴‍☠️','pirate'],['trésor','💰','treasure'],['coffre','🧰','chest'],['potion','🧪','potion'],['sortilège','✨','spell'],['baguette','🪄','wand'],['cape','🧥','cloak'],['quête','🗺️','quest'],['héros','🦸','hero'],['monstre','👾','monster'],['fantôme','👻','ghost'],['gobelin','','goblin'],['phénix','🔥','phoenix'],['prince','🤴','prince'],['princesse','👸','princess'],['royaume','🏰','kingdom'],['trône','🪑','throne']],
+ feel:[['heureux','😊','happy'],['triste','😢','sad'],['fâché','😠','angry'],['effrayé','😨','scared'],['courageux','🦁','brave'],['timide','😳','shy'],['fier','😌','proud'],['calme','😌','calm'],['rigolo','🤪','funny'],['grognon','😾','grumpy'],['excité','🤩','excited'],['nerveux','😬','nervous'],['jaloux','😒','jealous'],['curieux','🧐','curious'],['joyeux','😄','joyful'],['gentil','💗','kind'],['honnête','💯','honest'],['seul','🕯️','lonely'],['surpris','😲','surprised'],['inquiet','😟','worried'],['patient','⏳','patient'],['content','😊','glad']],
+ school:[['stylo','🖊️','pen'],['livre','📖','book'],['bureau','','desk'],['craie','','chalk'],['papier','📄','paper'],['crayon','✏️','pencil'],['gomme','','eraser'],['feutre','🖍️','marker'],['règle','📏','ruler'],['colle','','glue'],['ciseaux','✂️','scissors'],['cartable','🎒','school bag'],['cahier','📓','notebook'],['maître','🧑‍🏫','teacher'],['élève','🧑‍🎓','student'],['leçon','','lesson'],['récré','🛝','recess'],['lecture','📖','reading'],['devoirs','📝','homework'],['classe','🏫','classroom'],['alphabet','🔤','alphabet'],['nombre','🔢','number'],['lettre','🔡','letter'],['mot','💬','word'],['histoire','📖','story'],['poème','📜','poem']],
+ places:[['ville','🏙️','city'],['village','🏘️','village'],['ferme','🚜','farm'],['parc','🌳','park'],['zoo','🦓','zoo'],['musée','🏛️','museum'],['cirque','🎪','circus'],['pont','🌉','bridge'],['rue','🛣️','street'],['route','🛣️','road'],['tunnel','🚇','tunnel'],['port','⚓','harbor'],['aéroport','✈️','airport'],['gare','🚉','train station'],['boulangerie','🥐','bakery'],['marché','🛒','market'],['hôpital','🏥','hospital'],['théâtre','🎭','theater'],['stade','🏟️','stadium'],['pays','🌍','country'],['carte','🗺️','map']],
+ clothes:[['chapeau','🎩','hat'],['casquette','🧢','cap'],['chaussette','🧦','sock'],['chaussure','👟','shoe'],['botte','🥾','boot'],['manteau','🧥','coat'],['écharpe','🧣','scarf'],['gant','🧤','glove'],['robe','👗','dress'],['chemise','👕','shirt'],['pantalon','👖','pants'],['short','🩳','shorts'],['jupe','👗','skirt'],['veste','🧥','jacket'],['pull','🧶','sweater'],['pyjama','🛌','pajamas'],['moufle','🧤','mitten'],['ceinture','','belt'],['bouton','🔘','button'],['poche','','pocket']],
+ transport:[['voiture','🚗','car'],['bus','🚌','bus'],['train','🚂','train'],['camion','🚚','truck'],['moto','🏍️','motorcycle'],['tracteur','🚜','tractor'],['hélicoptère','🚁','helicopter'],['sous-marin','🫧','submarine'],['navire','🚢','ship'],['barque','🛶','rowboat'],['voilier','⛵','sailboat'],['métro','🚇','subway'],['taxi','🚕','taxi'],['ambulance','🚑','ambulance'],['traîneau','🛷','sled'],['wagon','','wagon'],['avion','✈️','plane'],['bateau','⛵','boat'],['trottinette','🛴','scooter'],['montgolfière','🎈','hot-air balloon']],
+ jobs:[['vétérinaire','🩺','vet'],['cuisinier','👨‍🍳','cook'],['infirmière','🧑‍⚕️','nurse'],['médecin','🩺','doctor'],['fermier','👨‍🌾','farmer'],['boulanger','🥖','baker'],['pilote','✈️','pilot'],['pompier','🧑‍🚒','firefighter'],['policier','👮','police officer'],['dentiste','🦷','dentist'],['artiste','🎨','artist'],['chanteur','🎤','singer'],['danseur','💃','dancer'],['maçon','🧱','builder'],['plombier','🔧','plumber'],['facteur','📬','mail carrier'],['juge','⚖️','judge'],['avocat','⚖️','lawyer'],['acteur','🎭','actor'],['coiffeur','💈','hairdresser'],['serveur','🍽️','waiter']],
+ little:[['le','','the'],['la','','the'],['un','1️⃣','a / one'],['une','','a / one'],['et','➕','and'],['ou','','or'],['il','','he'],['elle','','she'],['on','','we'],['du','','of the'],['des','','some'],['ma','','my'],['ta','','your'],['sa','','his/her'],['ne','','not'],['pas','','not'],['est','','is'],['son','','his/her'],['dans','','in'],['pour','','for'],['avec','','with'],['qui','','who'],['que','','that'],['quoi','','what'],['où','📍','where'],['mais','','but'],['dit','💬','says'],['être','','to be'],['avoir','','to have'],['vous','','you'],['nous','','we'],['ils','','they']]
+ },
+ sounds:{
+ 2:[['ou','loup','🐺'],['on','pont','🌉'],['an','maman','👩'],['en','dent','🦷'],['in','lapin','🐰'],['oi','roi','👑'],['ai','maison','🏠'],['au','auto','🚗'],['eu','feu','🔥'],['ch','chat','🐱'],['gn','montagne','⛰️'],['ph','photo','📷'],['ui','nuit','🌃'],['ei','neige','❄️']],
+ 3:[['eau','bateau','⛵'],['ain','pain','🍞'],['oin','loin',''],['ion','avion','✈️'],['ill','papillon','🦋'],['ien','chien','🐕']]
+ }
+},
+es:{ name:'Español', lang:'es-ES',
+ badge:{letter:'letra',word:'palabra',sound:'sonido',asin:'como en'},
+ letters:'A B C D E F G H I J K L M N Ñ O P Q R S T U V W X Y Z'.split(' '),
+ words:{
+ animals:[['gato','🐱','cat'],['perro','🐕','dog'],['lobo','🐺','wolf'],['oso','🐻','bear'],['león','🦁','lion'],['tigre','🐯','tiger'],['mono','🐒','monkey'],['conejo','🐰','rabbit'],['vaca','🐄','cow'],['oveja','🐑','sheep'],['caballo','🐴','horse'],['pato','🦆','duck'],['ratón','🐭','mouse'],['jirafa','🦒','giraffe'],['tiburón','🦈','shark'],['ballena','🐳','whale'],['delfín','🐬','dolphin'],['zorro','🦊','fox'],['búho','🦉','owl'],['abeja','🐝','bee'],['hormiga','🐜','ant'],['rana','🐸','frog'],['tortuga','🐢','turtle'],['araña','🕷️','spider'],['ardilla','🐿️','squirrel'],['elefante','🐘','elephant'],['pingüino','🐧','penguin'],['serpiente','🐍','snake'],['cerdo','🐷','pig'],['gallina','🐔','hen'],['pájaro','🐦','bird'],['pez','🐟','fish'],['burro','🫏','donkey'],['cabra','🐐','goat']],
+ space:[['luna','🌙','moon'],['sol','☀️','sun'],['estrella','⭐','star'],['tierra','🌍','Earth'],['marte','🔴','Mars'],['planeta','🪐','planet'],['cohete','🚀','rocket'],['cometa','☄️','comet'],['galaxia','🌌','galaxy'],['órbita','🔄','orbit'],['astronauta','👨‍🚀','astronaut'],['telescopio','🔭','telescope'],['satélite','📡','satellite'],['universo','🌌','universe'],['meteoro','☄️','meteor'],['eclipse','🌑','eclipse'],['saturno','🪐','Saturn'],['júpiter','🟤','Jupiter']],
+ body:[['brazo','💪','arm'],['pierna','🦵','leg'],['mano','✋','hand'],['pie','🦶','foot'],['cabeza','','head'],['nariz','👃','nose'],['boca','👄','mouth'],['oreja','👂','ear'],['ojo','👁️','eye'],['diente','🦷','tooth'],['cuello','','neck'],['espalda','','back'],['barriga','','belly'],['rodilla','','knee'],['codo','','elbow'],['hombro','','shoulder'],['tobillo','','ankle'],['dedo','👆','finger'],['pulgar','👍','thumb'],['pelo','💇','hair'],['cerebro','🧠','brain'],['corazón','❤️','heart'],['pulmón','🫁','lung'],['hueso','🦴','bone'],['piel','','skin'],['sangre','🩸','blood'],['mejilla','','cheek'],['ceja','','eyebrow']],
+ science:[['átomo','⚛️','atom'],['imán','🧲','magnet'],['energía','⚡','energy'],['fósil','🦴','fossil'],['volcán','🌋','volcano'],['lava','🌋','lava'],['cristal','💎','crystal'],['metal','⚙️','metal'],['líquido','💧','liquid'],['sólido','🧊','solid'],['vapor','♨️','steam'],['burbuja','🫧','bubble'],['pila','🔋','battery'],['robot','🤖','robot'],['máquina','⚙️','machine'],['motor','🚂','engine'],['microscopio','🔬','microscope'],['experimento','🧪','experiment'],['invento','💡','invention'],['dinosaurio','🦕','dinosaur']],
+ nature:[['lluvia','🌧️','rain'],['nieve','❄️','snow'],['viento','💨','wind'],['tormenta','⛈️','storm'],['nube','☁️','cloud'],['río','🏞️','river'],['océano','🌊','ocean'],['playa','🏖️','beach'],['bosque','🌲','forest'],['desierto','🏜️','desert'],['isla','🏝️','island'],['montaña','⛰️','mountain'],['valle','🏞️','valley'],['estanque','🪷','pond'],['lago','🏞️','lake'],['cascada','💦','waterfall'],['trueno','🌩️','thunder'],['rayo','⚡','lightning'],['arcoíris','🌈','rainbow'],['primavera','🌷','spring'],['verano','☀️','summer'],['otoño','🍂','autumn'],['invierno','⛄','winter'],['niebla','🌫️','fog'],['hielo','🧊','ice'],['lodo','🟤','mud'],['arena','🏖️','sand'],['semilla','🌱','seed'],['raíz','🌱','root'],['hoja','🍃','leaf'],['rama','🌳','branch'],['flor','🌸','flower'],['hierba','🌿','grass'],['árbol','🌳','tree']],
+ home:[['cama','🛏️','bed'],['puerta','🚪','door'],['lámpara','💡','lamp'],['sofá','🛋️','sofa'],['silla','🪑','chair'],['mesa','🪑','table'],['ventana','🪟','window'],['cocina','🍳','kitchen'],['cuarto','🛏️','bedroom'],['jardín','🏡','garden'],['garaje','🚗','garage'],['espejo','🪞','mirror'],['almohada','','pillow'],['manta','','blanket'],['alfombra','','rug'],['cortina','','curtain'],['estante','📚','shelf'],['cajón','','drawer'],['cuchara','🥄','spoon'],['tenedor','🍴','fork'],['plato','🍽️','plate'],['tazón','🥣','bowl'],['horno','','oven'],['nevera','🧊','fridge'],['jabón','🧼','soap'],['toalla','','towel'],['escoba','🧹','broom'],['balde','🪣','bucket'],['escalera','🪜','ladder'],['llave','🔑','key'],['reloj','🕐','clock']],
+ food:[['pan','🍞','bread'],['arroz','🍚','rice'],['sopa','🍲','soup'],['queso','🧀','cheese'],['manzana','🍎','apple'],['uva','🍇','grape'],['limón','🍋','lemon'],['durazno','🍑','peach'],['melón','🍈','melon'],['mango','🥭','mango'],['cereza','🍒','cherry'],['plátano','🍌','banana'],['naranja','🍊','orange'],['tomate','🍅','tomato'],['papa','🥔','potato'],['zanahoria','🥕','carrot'],['cebolla','🧅','onion'],['ensalada','🥗','salad'],['pasta','🍝','pasta'],['pizza','🍕','pizza'],['galleta','🍪','cookie'],['panqueque','🥞','pancake'],['miel','🍯','honey'],['azúcar','🍬','sugar'],['mantequilla','🧈','butter'],['yogur','🥛','yogurt'],['cereal','🥣','cereal'],['sándwich','🥪','sandwich'],['chocolate','🍫','chocolate'],['jugo','🧃','juice'],['leche','🥛','milk'],['huevo','🥚','egg'],['pastel','🍰','cake'],['fresa','🍓','strawberry'],['frambuesa','','raspberry']],
+ play:[['correr','🏃','to run'],['saltar','🤸','to jump'],['nadar','🏊','to swim'],['bailar','💃','to dance'],['cantar','🎤','to sing'],['dibujar','✏️','to draw'],['pintar','🎨','to paint'],['leer','📖','to read'],['trepar','🧗','to climb'],['patinar','⛸️','to skate'],['carrera','🏁','race'],['bicicleta','🚲','bike'],['fútbol','⚽','soccer'],['tenis','🎾','tennis'],['ajedrez','♟️','chess'],['rompecabezas','🧩','puzzle'],['papalote','🪁','kite'],['tambor','🥁','drum'],['piano','🎹','piano'],['guitarra','🎸','guitar'],['violín','🎻','violin'],['acampar','🏕️','camping'],['pescar','🎣','to fish'],['caminata','🥾','hike'],['columpio','','swing'],['tobogán','🛝','slide'],['cuerda','🪢','rope'],['canicas','','marbles']],
+ fantasy:[['rey','👑','king'],['reina','👸','queen'],['corona','👑','crown'],['magia','✨','magic'],['bruja','🧙‍♀️','witch'],['mago','🧙','wizard'],['hada','🧚','fairy'],['gigante','🗿','giant'],['ogro','','ogre'],['elfo','🧝','elf'],['enano','','dwarf'],['caballero','🛡️','knight'],['espada','⚔️','sword'],['escudo','🛡️','shield'],['castillo','🏰','castle'],['torre','🗼','tower'],['dragón','🐉','dragon'],['unicornio','🦄','unicorn'],['sirena','🧜‍♀️','mermaid'],['pirata','🏴‍☠️','pirate'],['tesoro','💰','treasure'],['cofre','🧰','chest'],['poción','🧪','potion'],['hechizo','✨','spell'],['varita','🪄','wand'],['capa','🧥','cloak'],['héroe','🦸','hero'],['monstruo','👾','monster'],['fantasma','👻','ghost'],['duende','','goblin'],['fénix','🔥','phoenix'],['príncipe','🤴','prince'],['princesa','👸','princess'],['reino','🏰','kingdom'],['trono','🪑','throne']],
+ feel:[['feliz','😊','happy'],['triste','😢','sad'],['enojado','😠','angry'],['asustado','😨','scared'],['valiente','🦁','brave'],['tímido','😳','shy'],['orgulloso','😌','proud'],['tranquilo','😌','calm'],['chistoso','🤪','funny'],['gruñón','😾','grumpy'],['emocionado','🤩','excited'],['nervioso','😬','nervous'],['celoso','😒','jealous'],['curioso','🧐','curious'],['alegre','😄','joyful'],['amable','💗','kind'],['honesto','💯','honest'],['solo','🕯️','lonely'],['sorprendido','😲','surprised'],['preocupado','😟','worried'],['paciente','⏳','patient'],['contento','😊','glad']],
+ school:[['pluma','🖊️','pen'],['libro','📖','book'],['pupitre','','desk'],['tiza','','chalk'],['papel','📄','paper'],['lápiz','✏️','pencil'],['borrador','','eraser'],['crayón','🖍️','crayon'],['regla','📏','ruler'],['pegamento','','glue'],['tijeras','✂️','scissors'],['mochila','🎒','backpack'],['cuaderno','📓','notebook'],['maestro','🧑‍🏫','teacher'],['alumno','🧑‍🎓','student'],['lección','','lesson'],['recreo','🛝','recess'],['lectura','📖','reading'],['tarea','📝','homework'],['clase','🏫','classroom'],['alfabeto','🔤','alphabet'],['número','🔢','number'],['letra','🔡','letter'],['palabra','💬','word'],['cuento','📖','story'],['poema','📜','poem']],
+ places:[['ciudad','🏙️','city'],['pueblo','🏘️','town'],['granja','🚜','farm'],['parque','🌳','park'],['zoológico','🦓','zoo'],['museo','🏛️','museum'],['circo','🎪','circus'],['puente','🌉','bridge'],['calle','🛣️','street'],['camino','🛣️','road'],['túnel','🚇','tunnel'],['puerto','⚓','harbor'],['aeropuerto','✈️','airport'],['estación','🚉','station'],['panadería','🥐','bakery'],['mercado','🛒','market'],['hospital','🏥','hospital'],['teatro','🎭','theater'],['estadio','🏟️','stadium'],['país','🌍','country'],['mapa','🗺️','map']],
+ clothes:[['sombrero','🎩','hat'],['gorra','🧢','cap'],['calcetín','🧦','sock'],['zapato','👟','shoe'],['bota','🥾','boot'],['abrigo','🧥','coat'],['bufanda','🧣','scarf'],['guante','🧤','glove'],['vestido','👗','dress'],['camisa','👕','shirt'],['pantalón','👖','pants'],['falda','👗','skirt'],['chaqueta','🧥','jacket'],['suéter','🧶','sweater'],['pijama','🛌','pajamas'],['mitón','🧤','mitten'],['cinturón','','belt'],['botón','🔘','button'],['bolsillo','','pocket']],
+ transport:[['carro','🚗','car'],['autobús','🚌','bus'],['tren','🚂','train'],['camión','🚚','truck'],['moto','🏍️','motorcycle'],['tractor','🚜','tractor'],['helicóptero','🚁','helicopter'],['submarino','🫧','submarine'],['velero','⛵','sailboat'],['metro','🚇','subway'],['taxi','🚕','taxi'],['ambulancia','🚑','ambulance'],['trineo','🛷','sled'],['vagón','','wagon'],['avión','✈️','plane'],['barco','🚢','ship'],['bote','🛶','boat'],['canoa','🛶','canoe'],['patineta','🛴','scooter'],['globo','🎈','balloon']],
+ jobs:[['veterinario','🩺','vet'],['cocinero','👨‍🍳','cook'],['enfermera','🧑‍⚕️','nurse'],['médico','🩺','doctor'],['granjero','👨‍🌾','farmer'],['panadero','🥖','baker'],['piloto','✈️','pilot'],['bombero','🧑‍🚒','firefighter'],['policía','👮','police officer'],['dentista','🦷','dentist'],['artista','🎨','artist'],['cantante','🎤','singer'],['bailarín','💃','dancer'],['albañil','🧱','builder'],['plomero','🔧','plumber'],['cartero','📬','mail carrier'],['juez','⚖️','judge'],['abogado','⚖️','lawyer'],['actor','🎭','actor'],['peluquero','💈','hairdresser'],['mesero','🍽️','waiter']],
+ little:[['el','','the'],['la','','the'],['un','1️⃣','a / one'],['una','','a / one'],['yo','🙋','I'],['tú','','you'],['es','','is'],['va','','goes'],['no','🚫','no'],['sí','','yes'],['mi','','my'],['tu','','your'],['su','','his/her'],['me','',''],['de','','of'],['en','','in'],['con','','with'],['por','','for'],['para','','for'],['que','','that'],['quién','','who'],['qué','','what'],['dónde','📍','where'],['pero','','but'],['dijo','💬','said'],['ellos','','they'],['somos','','we are'],['tiene','','has']]
+ },
+ sounds:{
+ 2:[['ma','mamá','👩'],['me','mesa','🪑'],['mi','mimo',''],['mo','moto','🏍️'],['mu','mula','🫏'],['pa','pato','🦆'],['pe','pelo','💇'],['pi','pino','🌲'],['po','pollo','🐔'],['pu','puma','🐆'],['la','lana','🧶'],['le','león','🦁'],['li','lima','🍋'],['lo','lobo','🐺'],['lu','luna','🌙'],['sa','sapo','🐸'],['se','seis','6️⃣'],['si','silla','🪑'],['so','sol','☀️'],['su','sube','⬆️'],['ta','taza','☕'],['te','techo','🏠'],['ti','tigre','🐯'],['to','toro','🐂'],['tu','tubo',''],['na','nariz','👃'],['ne','nene','👶'],['ni','nido','🪺'],['no','nota','🎵'],['nu','nube','☁️'],['ra','rana','🐸'],['re','red','🥅'],['ri','risa','😄'],['ro','rosa','🌹'],['ru','rueda','🛞'],['da','dado','🎲'],['de','dedo','👆'],['di','diez','🔟'],['do','dos','✌️'],['du','dulce','🍬'],['ca','casa','🏠'],['co','cola','🥤'],['cu','cuna','🛏️'],['fa','faro','🗼'],['fo','foca','🦭'],['fu','fuego','🔥'],['ch','chocolate','🍫'],['ll','lluvia','🌧️'],['rr','perro','🐕'],['qu','queso','🧀'],['gu','guitarra','🎸']]
+ }
+}
+};
+
+
+
+const FLAGS={en:'🇺🇸',fr:'🇫🇷',es:'🇪🇸'};
+
+/* ================= state ================= */
+let mode='num', curLang='en', curLen=2, lenMode='eq', picMode='show';
+let selCats=new Set();
+let playMode='train', testN=10;
+let freeStars=0, lastKey=null, colorIdx=0, curItem=null;
+const bags={}, wrongKeys=new Map();
+let hist=[], histIdx=-1;
+let test={active:false,i:0,correct:0,results:[],missed:[],state:'idle'};
+const COLORS=['#FF6B6B','#7C5CFC','#1BC7A8','#3AA0FF','#FF8A5B','#E8478B','#F4A400','#5AC85A'];
+
+const display=$('display'),wordEl=$('wordEl'),dots=$('dots'),turnChip=$('turnChip');
+const revealBtn=$('revealBtn'),revealText=$('revealText'),revealIcon=$('revealIcon');
+const hearBtn=$('hearBtn'),prevBtn=$('prevBtn'),trainBtns=$('trainBtns'),fallbackBtns=$('fallbackBtns');
+function setChip(html){ turnChip.innerHTML=html; }
+
+/* ================= pools + shuffle bag ================= */
+function numRange(){
+  let lo=parseInt($('min').value,10),hi=parseInt($('max').value,10);
+  if(isNaN(lo))lo=1; if(isNaN(hi))hi=30;
+  lo=Math.max(1,Math.min(100,lo)); hi=Math.max(1,Math.min(100,hi));
+  if(lo>hi){[lo,hi]=[hi,lo];} return [lo,hi];
+}
+function poolKey(){
+  if(mode==='num')return 'num:'+curLang+':'+numRange().join(':');
+  if(mode==='snd')return 'snd:'+curLang;
+  return 'let:'+curLang+':'+curLen+':'+lenMode+':'+[...selCats].sort().join(',');
+}
+function itemKey(it){ return mode==='num'?curLang+':n'+it:curLang+':'+it.type+':'+it.t; }
+function bucketLen(t){ const L=[...t].length; return L>=7?7:L; }
+function lenMatch(t){
+  const L=[...t].length;
+  if(lenMode==='ge') return L>=curLen;
+  return curLen===7?L>=7:L===curLen;
+}
+function catOn(id){ return selCats.size===0||selCats.has(id); }
+function buildPool(){
+  const d=DATA[curLang];
+  if(mode==='num'){ const [lo,hi]=numRange(),p=[];for(let n=lo;n<=hi;n++)p.push(n);return p; }
+  if(mode==='snd'){
+    const p=[];
+    if(d.sounds)for(const len of Object.keys(d.sounds))
+      d.sounds[len].forEach(s=>p.push({type:'sound',t:s[0],ex:s[1],exIcon:s[2]}));
+    return p;
+  }
+  if(curLen===1&&lenMode==='eq'){ const p=[];d.letters.forEach(L=>p.push({type:'letter',t:L}));return p; }
+  const pool=[];
+  for(const cat of Object.keys(d.words)){
+    if(!catOn(cat))continue;
+    d.words[cat].forEach(w=>{ if(lenMatch(w[0]))pool.push({type:'word',t:w[0],icon:w[1],gloss:w[2],cat}); });
+  }
+  return pool;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function refillBag(key){
+  let pool=buildPool();
+  if(!pool.length){ selCats.clear(); renderTopics&&renderTopics(); refreshFilters&&refreshFilters(); pool=buildPool(); }
+  const wrong=shuffle(pool.filter(x=>wrongKeys.has(itemKey(x))));
+  const rest=shuffle(pool.filter(x=>!wrongKeys.has(itemKey(x))));
+  let bag=wrong.concat(rest);
+  if(bag.length>1&&lastKey&&itemKey(bag[0])===lastKey){[bag[0],bag[1]]=[bag[1],bag[0]];}
+  bags[key]=bag;
+}
+function draw(){
+  const key=poolKey();
+  if(!bags[key]||!bags[key].length)refillBag(key);
+  const it=bags[key].shift();
+  lastKey=itemKey(it);
+  return it;
+}
+function resetBags(){for(const k in bags)delete bags[k];}
+
+/* ================= rendering (no type badge — R13.3) ================= */
+function renderItem(it,opts){
+  curItem=it;
+  const color=COLORS[(colorIdx++)%COLORS.length];
+  display.innerHTML='';wordEl.textContent='';
+  const box=document.createElement('div');box.className='animate-pop';
+  box.style.cssText='display:flex;flex-direction:column;align-items:center;gap:12px;';
+  const d=DATA[curLang];
+  if(mode==='num'){
+    const num=document.createElement('p');num.className='numeral';num.textContent=it;
+    num.style.color=color;num.style.textShadow='0 5px 0 '+color+'33';
+    box.appendChild(num);
+    if(!(opts&&opts.hideAnswer))box.appendChild(buildCounters(it));   // pips = countable giveaway in tests (R6.2)
+  } else if(it.type==='sound'){
+    const w=document.createElement('p');w.className='bigtext';w.textContent=it.t;
+    w.style.color=color;w.style.textShadow='0 5px 0 '+color+'2e';box.appendChild(w);
+    if(!(opts&&opts.hideAnswer)){
+      const ex=document.createElement('div');ex.className='example';
+      ex.innerHTML=d.badge.asin+' <b>'+it.ex+'</b> '+(it.exIcon||'');box.appendChild(ex);
+    }
+  } else if(it.type==='letter'){
+    const w=document.createElement('p');w.className='bigtext';w.textContent=it.t;
+    w.style.color=color;w.style.textShadow='0 5px 0 '+color+'2e';box.appendChild(w);
+    const sub=document.createElement('div');sub.className='sub';sub.textContent=it.t.toLowerCase();box.appendChild(sub);
+  } else { /* word */
+    if(it.icon&&!(opts&&opts.hideAnswer)&&picMode!=='hide'){
+      if(picMode==='reveal'){
+        const pk=document.createElement('button');pk.className='peek';pk.textContent='❓';
+        pk.setAttribute('aria-label','Reveal picture');
+        pk.addEventListener('click',()=>{
+          const ic=document.createElement('div');ic.className='card-icon animate-pop';ic.textContent=it.icon;
+          pk.replaceWith(ic);playPop();
+        });
+        box.appendChild(pk);
+      } else {
+        const ic=document.createElement('div');ic.className='card-icon';ic.textContent=it.icon;box.appendChild(ic);
+      }
+    }
+    const w=document.createElement('p');w.className='bigtext';w.textContent=it.t;
+    w.style.color=color;w.style.textShadow='0 5px 0 '+color+'2e';box.appendChild(w);
+    if(it.gloss&&!(opts&&opts.hideAnswer)){const g=document.createElement('div');g.className='example';g.textContent='('+it.gloss+')';box.appendChild(g);}
+    if(it.cat){const c=CATS.find(x=>x.id===it.cat);
+      if(c){const tag=document.createElement('span');tag.className='cat-tag';
+        tag.textContent=c.e+' '+c[curLang];box.appendChild(tag);}}
+  }
+  display.appendChild(box);
+  playPop();
+  if(!(opts&&opts.quiet))confettiBurst(color);
+}
+function buildCounters(n){
+  const icons=['🍎','⭐','🐢','🦋','🚗','🌸','🐠','🎈','🐝','🍓','🐧','🦆','🌟','🐞','🍀','🚀','🐙','🍩','🐰','🌈'];
+  const icon=icons[Math.floor(Math.random()*icons.length)];
+  const wrap=document.createElement('div');wrap.className='counters';
+  const perRow=n>20?10:5;
+  if(n>50)wrap.classList.add('tiny');else if(n>20)wrap.classList.add('small');
+  let made=0;
+  for(let r=0;r*perRow<n;r++){const row=document.createElement('div');row.className='counter-row';
+    for(let c=0;c<perRow&&made<n;c++,made++){const s=document.createElement('span');s.className='pip';
+      s.textContent=icon;s.style.animationDelay=(made*0.03)+'s';row.appendChild(s);}
+    wrap.appendChild(row);}
+  return wrap;
+}
+/* Hear it: speaks — and for numbers also shows the word (replaces Show word, R13.7) */
+function sayItem(){
+  if(curItem==null)return;
+  const lang=DATA[curLang].lang;
+  if(mode==='num'){ const w=numberToWords(curItem,curLang); wordEl.textContent=w; speak(w,lang,0.8); }
+  else speak(curItem.t,lang,curItem.type==='sound'?0.7:0.8);
+}
+
+/* ================= speech answer checking (R15) ================= */
+function normTxt(s){
+  return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[-'']/g,' ').replace(/[^a-z0-9ñ ]/gi,' ').replace(/\s+/g,' ').trim();
+}
+function answerMatches(alts,item,lang,gameMode){
+  if(!alts||!alts.length)return false;
+  if(gameMode==='num'){
+    const word=normTxt(numberToWords(item,lang)), digits=String(item);
+    return alts.some(a=>{const n=normTxt(a);
+      return n===word||n.split(' ').includes(digits)||n.replace(/ /g,'')===word.replace(/ /g,'')||parseInt(n,10)===item;});
+  }
+  const target=normTxt(item.t);
+  return alts.some(a=>{const n=normTxt(a);
+    return n===target||n.split(' ').includes(target)||n.replace(/ /g,'')===target.replace(/ /g,'');});
+}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+let srBroken=false;                       // set when the mic hard-fails (permission / file:// / no service)
+function srAvailable(){ return !!SR&&!srBroken; }
+function forceFallback(){ return mode==='snd'||(mode==='let'&&curLen===1&&lenMode==='eq'); }
+function listenOnce(cb){
+  let done=false;
+  const finish=v=>{ if(!done){done=true;cb(v);} };
+  try{
+    try{window.speechSynthesis.cancel();}catch(e){}   // never listen while talking
+    const r=new SR();
+    r.lang=DATA[curLang].lang; r.interimResults=false; r.maxAlternatives=5;
+    r.onresult=e=>{ const alts=[],res=e.results[0];
+      for(let i=0;i<res.length;i++)alts.push(res[i].transcript);
+      finish({alts}); };
+    r.onerror=e=>finish({error:(e&&e.error)||'unknown'});
+    r.onend=()=>finish({error:'no-speech'});
+    r.start();
+  }catch(e){ finish({error:'unsupported'}); }
+}
+
+/* ================= practice mode with history (R17) ================= */
+function trainDraw(){
+  if(histIdx<hist.length-1){ histIdx++; renderItem(hist[histIdx]); }
+  else { const it=draw(); hist.push(it); if(hist.length>200)hist.shift(); histIdx=hist.length-1; renderItem(it); }
+  afterTrainRender();
+}
+function trainPrev(){
+  if(histIdx<=0)return;
+  histIdx--; renderItem(hist[histIdx],{quiet:true});
+  afterTrainRender();
+}
+function afterTrainRender(){
+  hearBtn.disabled=false;
+  prevBtn.disabled=histIdx<=0;
+  revealText.textContent='Next one!';revealIcon.textContent='➡️';
+  freeStars++;setChip('⭐ <span id="chipText">'+freeStars+'</span>');
+}
+
+/* ================= test mode (R14/R15/R16) ================= */
+function startTest(){
+  test={active:true,i:0,correct:0,results:[],missed:[],state:'question'};
+  delete document.body.dataset.fireworks;
+  resetBags();  /* fresh shuffle for a fair test */
+  nextQuestion();
+}
+function nextQuestion(){
+  test.state='question';
+  const it=draw();
+  renderItem(it,{hideAnswer:true,quiet:true});
+  trainBtns.classList.add('hidden');
+  const fb=forceFallback()||!srAvailable();
+  fallbackBtns.classList.toggle('hidden',!fb);
+  $('srNote').classList.add('hidden');
+  if(fb) showNote(forceFallback()
+    ?'Speech checking is unreliable for this content — grown-up taps ✓ or ✗ after the answer.'
+    :srBroken
+      ?'🎤 Mic unavailable — grown-up taps ✓ or ✗.'
+      :'🎤 Speech recognition is not available in this browser — grown-up taps ✓ or ✗.');
+  revealBtn.classList.toggle('hidden',fb);
+  if(!fb){ revealBtn.className='reveal listen'; revealText.textContent='Say it!'; revealIcon.textContent='🎤'; }
+  updateTestChip(); updateDots();
+}
+function micTap(){
+  if(test.state!=='question')return;
+  test.state='listening';
+  revealBtn.className='reveal listening'; revealText.textContent='Listening…'; revealIcon.textContent='👂';
+  listenOnce(res=>{
+    if(res.alts&&res.alts.length){
+      const ok=answerMatches(res.alts,curItem,curLang,mode);
+      if(!ok)showNote('👂 I heard: “'+res.alts[0]+'”');
+      settleAnswer(ok);                                   // only a real answer is ever scored (R6.9)
+      return;
+    }
+    /* not an answer — never counts against the child */
+    test.state='question';
+    revealBtn.className='reveal listen'; revealText.textContent='Say it!'; revealIcon.textContent='🎤';
+    if(res.error==='no-speech'||res.error==='aborted'){
+      showNote('👂 I didn’t hear anything — tap the button and try again!');
+      return;
+    }
+    /* hard failure: mic permission denied, no service (common for file:// pages), etc. */
+    srBroken=true;
+    fallbackBtns.classList.remove('hidden'); revealBtn.classList.add('hidden');
+    showNote('🎤 The microphone isn’t available here ('+res.error+'). That usually happens when the page '
+      +'is opened as a saved file — mic checking needs the page served from a website. '
+      +'No problem: the grown-up taps ✓ or ✗ instead.');
+  });
+}
+function showNote(t){ const n=$('srNote'); n.textContent=t; n.classList.remove('hidden'); }
+function settleAnswer(ok){
+  if(test.state==='answered')return;
+  test.state='answered';
+  const k=itemKey(curItem);
+  test.results.push(ok);
+  const stage=$('stage');
+  if(ok){ test.correct++; playRight(); stage.classList.add('okflash'); $('srNote').classList.add('hidden');
+    if(wrongKeys.has(k)){const left=wrongKeys.get(k)-1; left<=0?wrongKeys.delete(k):wrongKeys.set(k,left);}
+  } else { playWrong(); stage.classList.add('badflash');
+    wrongKeys.set(k,2);
+    const label=mode==='num'?String(curItem):curItem.t;
+    if(!test.missed.includes(label))test.missed.push(label);
+    /* show + say the right answer so the miss teaches (R10) */
+    renderItem(curItem,{quiet:true});
+    sayItem();
+  }
+  setTimeout(()=>stage.classList.remove('okflash','badflash'),600);
+  test.i++;
+  updateDots();updateTestChip();
+  setTimeout(()=>{ test.i>=testN?endTest():nextQuestion(); }, ok?650:1800);
+}
+function endTest(){
+  test.active=false;test.state='done';
+  const pct=Math.round(100*test.correct/testN);
+  const pass=pct>=80, perfect=pct===100;
+  display.innerHTML='';dots.innerHTML='';
+  fallbackBtns.classList.add('hidden');$('srNote').classList.add('hidden');
+  const p=document.createElement('div');p.className='panel animate-pop';
+  const emoji=perfect?'🏆':pass?'🎆':'🌱';
+  const line=perfect?'PERFECT! Incredible!':pass?'You passed — amazing!':'Good try — practice makes progress!';
+  p.innerHTML='<div class="big-emoji">'+emoji+'</div><h2>'+test.correct+' / '+testN+' — '+pct+'%</h2>'+
+    '<div class="scoreline">'+line+'</div>'+
+    (test.missed.length?'<div class="practice">To practice: <b>'+test.missed.join('</b> · <b>')+'</b></div>':'');
+  display.appendChild(p);
+  if(perfect)fireworks(2); else if(pass)fireworks(1);
+  revealBtn.classList.remove('hidden');revealBtn.className='reveal';
+  revealText.textContent='Try again!';revealIcon.textContent='🔁';
+  test.state='idle-after';
+}
+function updateTestChip(){ setChip('🎓 <span id="chipText">'+Math.min(test.i,testN)+'/'+testN+'</span>'); }
+function updateDots(){
+  dots.innerHTML='';
+  if(playMode!=='test'||!test.active)return;
+  for(let i=0;i<testN;i++){
+    const d=document.createElement('span');d.className='dot';
+    if(i<test.results.length)d.classList.add(test.results[i]?'ok':'bad');
+    else if(i===test.results.length)d.classList.add('now');
+    dots.appendChild(d);
+  }
+}
+
+/* ================= big button ================= */
+function bigButton(){
+  if(playMode==='train'){ trainDraw(); return; }
+  if(test.active&&test.state==='question'){ micTap(); return; }
+  if(!test.active){ startTest(); return; }
+}
+function setIdleUI(){
+  curItem=null;hist=[];histIdx=-1;test.active=false;test.state='idle';
+  wordEl.textContent='';dots.innerHTML='';
+  fallbackBtns.classList.add('hidden');$('srNote').classList.add('hidden');
+  revealBtn.classList.remove('hidden');revealBtn.className='reveal';
+  hearBtn.disabled=true;prevBtn.disabled=true;
+  $('flagEl').textContent=FLAGS[curLang];
+  if(playMode==='train'){
+    trainBtns.classList.remove('hidden');
+    revealText.textContent='Give me one!';revealIcon.textContent='🎲';
+    display.innerHTML='<div class="hint"><span class="big">👋🐣</span>Ready when you are!<br>Tap the big button below.</div>';
+    setChip('⭐ <span id="chipText">'+freeStars+'</span>');
+  } else {
+    trainBtns.classList.add('hidden');
+    revealText.textContent='Start the test! ('+testN+')';revealIcon.textContent='🎓';
+    const how=(forceFallback()||!srAvailable())?'A grown-up checks each answer.':'Say each answer out loud into the mic!';
+    display.innerHTML='<div class="hint"><span class="big">🎓🎤</span>'+testN+' questions.<br>'+how+'</div>';
+    setChip('🎓 <span id="chipText">0/'+testN+'</span>');
+  }
+}
+
+/* ================= filters (R12, adapted to v6) ================= */
+function availability(){
+  const d=DATA[curLang],counts={};
+  for(const cat of Object.keys(d.words)){
+    counts[cat]={};
+    for(const w of d.words[cat]){const b=bucketLen(w[0]);counts[cat][b]=(counts[cat][b]||0)+1;}
+  }
+  return counts;
+}
+function lenAvailable(len,counts){
+  if(len===1)return true;
+  const cats=selCats.size?[...selCats]:Object.keys(counts);
+  if(lenMode==='ge')
+    return cats.some(c=>counts[c]&&[2,3,4,5,6,7].some(b=>b>=len&&counts[c][b]));
+  return cats.some(c=>counts[c]&&counts[c][len]);
+}
+function catAvailable(cat,counts){
+  if(curLen===1&&lenMode==='eq')return false;
+  if(lenMode==='ge')return !!(counts[cat]&&[2,3,4,5,6,7].some(b=>b>=curLen&&counts[cat][b]));
+  return !!(counts[cat]&&counts[cat][curLen]);
+}
+function lenLabel(l){return l===7?'7+':String(l);}
+function topicSummary(){
+  if(!selCats.size)return 'All topics';
+  return [...selCats].map(id=>{const c=CATS.find(x=>x.id===id);return c?c.e+' '+c[curLang]:id;}).join(' + ');
+}
+function refreshFilters(){
+  if(mode!=='let'){$('filterHint').classList.add('hidden');return;}
+  const counts=availability();
+  let hint='',warn=false,anyOff=false;
+  document.querySelectorAll('#lenSeg [data-len]').forEach(b=>{
+    const len=parseInt(b.dataset.len,10),on=lenAvailable(len,counts);
+    b.classList.toggle('off',!on);b.disabled=!on;if(!on)anyOff=true;
+  });
+  if(!lenAvailable(curLen,counts)){
+    const opts=[2,3,4,5,6,7].filter(l=>lenAvailable(l,counts));
+    if(opts.length){
+      const oldLen=curLen;
+      opts.sort((a,b)=>Math.abs(a-curLen)-Math.abs(b-curLen)||b-a);
+      curLen=opts[0];
+      document.querySelectorAll('#lenSeg [data-len]').forEach(x=>
+        x.classList.toggle('active',parseInt(x.dataset.len,10)===curLen));
+      hint='⚠️ '+topicSummary()+' has no '+lenLabel(oldLen)+'-letter words in '+DATA[curLang].name+
+        ' — switched to '+lenLabel(curLen)+' letters.';
+      warn=true;
+    }
+  }
+  document.querySelectorAll('#topicSeg [data-cat]').forEach(b=>{
+    if(b.dataset.cat==='all')return;
+    const on=catAvailable(b.dataset.cat,counts);
+    b.classList.toggle('off',!on);b.disabled=false;
+    if(!on)anyOff=true;
+  });
+  if(!hint){
+    if(curLen===1&&lenMode==='eq')hint='ℹ️ Single letters use the whole alphabet — topics don’t apply.';
+    else if(anyOff)hint='ℹ️ Faded choices have no '+DATA[curLang].name+' words matching your picks — tapping one adjusts the other filters.';
+  }
+  const fh=$('filterHint');
+  fh.textContent=hint;fh.classList.toggle('hidden',!hint);fh.classList.toggle('warn',warn);
+}
+function renderTopics(){
+  const seg=$('topicSeg');seg.innerHTML='';
+  const all=document.createElement('button');
+  all.className='seg-btn topic'+(selCats.size===0?' active':'');
+  all.dataset.cat='all';all.textContent='✨ '+({en:'All',fr:'Tout',es:'Todo'})[curLang];
+  seg.appendChild(all);
+  for(const c of CATS){
+    const b=document.createElement('button');
+    b.className='seg-btn topic'+(selCats.has(c.id)?' active':'');
+    b.dataset.cat=c.id;b.textContent=c.e+' '+c[curLang];
+    seg.appendChild(b);
+  }
+}
+function updateModePanels(){
+  $('numControls').classList.toggle('hidden',mode!=='num');
+  $('letterControls').classList.toggle('hidden',mode!=='let');
+  $('soundControls').classList.toggle('hidden',mode!=='snd');
+  if(mode==='snd'){
+    const n=Object.values(DATA[curLang].sounds||{}).reduce((s,a)=>s+a.length,0);
+    $('soundInfo').textContent='🗣️ All '+n+' '+DATA[curLang].name+' sounds & syllables, shuffled. Each card shows an example word.';
+  }
+  $('testInfo').textContent=(forceFallback()||!srAvailable())
+    ?'ℹ️ For this content the grown-up validates answers with ✓ / ✗.'
+    :'🎤 The child says each answer out loud — the mic checks it. Needs internet + mic permission.';
+}
+
+/* ================= wiring ================= */
+revealBtn.addEventListener('click',bigButton);
+hearBtn.addEventListener('click',sayItem);
+prevBtn.addEventListener('click',trainPrev);
+$('markRight').addEventListener('click',()=>{if(test.active&&test.state==='question')settleAnswer(true);});
+$('markWrong').addEventListener('click',()=>{if(test.active&&test.state==='question')settleAnswer(false);});
+const openMenu=()=>document.body.classList.add('menu-open');
+const closeMenu=()=>document.body.classList.remove('menu-open');
+$('menuBtn').addEventListener('click',openMenu);
+$('flagEl').addEventListener('click',openMenu);
+$('menuClose').addEventListener('click',closeMenu);
+$('sheetBackdrop').addEventListener('click',closeMenu);
+function settingsChanged(){resetBags();setIdleUI();updateModePanels();}
+$('modeSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-mode]');if(!b)return;
+  document.querySelectorAll('#modeSeg .seg-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');mode=b.dataset.mode;
+  refreshFilters();settingsChanged();
+});
+$('langSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-lang]');if(!b)return;
+  document.querySelectorAll('#langSeg [data-lang]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');curLang=b.dataset.lang;
+  renderTopics();refreshFilters();settingsChanged();
+});
+$('lenSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-len]');if(!b)return;
+  document.querySelectorAll('#lenSeg [data-len]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');curLen=parseInt(b.dataset.len,10);
+  refreshFilters();settingsChanged();
+});
+$('lenModeSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-lm]');if(!b)return;
+  document.querySelectorAll('#lenModeSeg [data-lm]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');lenMode=b.dataset.lm;
+  refreshFilters();settingsChanged();
+});
+$('picSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-pic]');if(!b)return;
+  document.querySelectorAll('#picSeg [data-pic]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');picMode=b.dataset.pic;
+  settingsChanged();
+});
+$('topicSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-cat]');if(!b)return;
+  const id=b.dataset.cat;
+  if(id==='all')selCats.clear();
+  else if(selCats.has(id))selCats.delete(id);
+  else selCats.add(id);
+  renderTopics();refreshFilters();settingsChanged();
+});
+$('playModeSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-pm]');if(!b)return;
+  document.querySelectorAll('#playModeSeg [data-pm]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');playMode=b.dataset.pm;
+  $('testControls').classList.toggle('hidden',playMode!=='test');
+  settingsChanged();
+});
+$('testLenSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-tn]');if(!b)return;
+  document.querySelectorAll('#testLenSeg [data-tn]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');testN=parseInt(b.dataset.tn,10);
+  settingsChanged();
+});
+[$('min'),$('max')].forEach(el=>el.addEventListener('change',()=>{
+  let v=parseInt(el.value,10);if(!isNaN(v))el.value=Math.max(1,Math.min(100,v));
+  settingsChanged();
+}));
+document.addEventListener('keydown',e=>{
+  if((e.code==='Space'||e.code==='Enter')&&document.activeElement.tagName!=='INPUT'
+    &&!document.activeElement.classList.contains('seg-btn')
+    &&!document.activeElement.classList.contains('menu-btn')
+    &&!document.activeElement.classList.contains('sheet-close')){
+    e.preventDefault();bigButton();
+  }
+});
+renderTopics();refreshFilters();updateModePanels();setIdleUI();
+</script>
+</body>
+</html>
